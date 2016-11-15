@@ -26,7 +26,7 @@ public class Intersection {
     private final List<List<TrafficNode>> routes = new ArrayList<>();
     private final List<Vehicle> vehicles;
     private final Random rand = new Random();
-    private final ClientSocket connection;
+    private ClientSocket connection;
 
     public Intersection(ClientSocket connection) {
         this.connection = connection;

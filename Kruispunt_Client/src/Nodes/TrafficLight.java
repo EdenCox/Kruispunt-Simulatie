@@ -65,7 +65,7 @@ public class TrafficLight implements TrafficNode {
 
     @Override
     public boolean isAvailable() {
-        return !hasVehicle() && light != Light.Red;
+        return !hasVehicle() && light == Light.Green;
     }
 
     public void setLight(Light light) {

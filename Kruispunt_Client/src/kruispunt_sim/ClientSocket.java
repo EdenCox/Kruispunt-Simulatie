@@ -5,7 +5,6 @@
  */
 package kruispunt_sim;
 
-import Nodes.Light;
 import java.io.IOException;
 import java.net.URI;
 import java.util.logging.Level;

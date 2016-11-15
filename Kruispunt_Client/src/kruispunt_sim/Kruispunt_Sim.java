@@ -21,8 +21,6 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class Kruispunt_Sim extends Application {
 
@@ -35,7 +33,7 @@ public class Kruispunt_Sim extends Application {
 
     @Override
     public void start(final Stage primaryStage) {
-        intersection = new Intersection(connection);
+        //intersection = new Intersection(connection);
         initialize(primaryStage);
     }
 
@@ -116,9 +114,12 @@ public class Kruispunt_Sim extends Application {
         btn.setOnAction((ActionEvent event) -> {
             if (connection == null) {
                 connection = new ClientSocket(getIpString(), ipFields[4].getText());
+                intersection = new Intersection(connection);
                 btn.setText("Disconnect");
             } else {
                 connection = null;
+                intersection = null;
+                timer = 0;
                 btn.setText("Connect");
             }
 
@@ -135,21 +136,22 @@ public class Kruispunt_Sim extends Application {
 
         Scene scene = new Scene(pane, 400, 427);
 
-        primaryStage.setTitle("Image push!");
+        primaryStage.setTitle("Intersection..");
         primaryStage.setScene(scene);
         primaryStage.setMaximized(true);
         primaryStage.show();
 
-        //0  1000000
         new AnimationTimer() {
             @Override
             public void handle(long currentNanoTime) {
-                //System.out.println(currentNanoTime);
-                timer++;
-                if (timer > 60) {
-                    timer = 0;
-                    intersection.Update();
-                    updateGrid();
+                //System.out.println(currentNanoTime);              
+                if (intersection != null) {
+                    timer++;
+                    if (timer > 60) {
+                        timer = 0;
+                        intersection.Update();
+                        updateGrid();
+                    }
                 }
             }
         }.start();
