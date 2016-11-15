@@ -67,7 +67,7 @@ public class ClientSocket {
         }
         JSONObject json = new JSONObject();
         json.append("Test", "Henk");
-        sendString("{'state':[{ 'traffic': 1, 'count' : 10}]}");
+        sendString("{'state':[{ 'trafficLight': 1, 'count' : 10}]}");
     }
 
     public void sendString(String text) {
