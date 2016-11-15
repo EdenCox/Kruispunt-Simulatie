@@ -5,6 +5,7 @@
  */
 package kruispunt_sim;
 
+import Nodes.Light;
 import java.io.IOException;
 import java.net.URI;
 import java.util.logging.Level;
@@ -28,11 +29,11 @@ public class ClientSocket {
 
     private static final Logger LOGGER = Logger.getLogger(ClientSocket.class.getName());
     private Session session;
-    JSONObject jsonString;
+    private JSONObject lastState;
 
     public ClientSocket(String ip, String port) {
         connectToWebSocket(ip, port);
-        jsonString = new JSONObject();
+        lastState = new JSONObject();
 
     }
 
@@ -50,9 +51,7 @@ public class ClientSocket {
     public void onMessage(String message) {
         System.out.println("WebSocket message Received!");
         System.out.println(message);
-//        JSONObject json = new JSONObject(message);
-//        System.out.println(message);
-//        System.out.println(json.get("Lol"));
+        lastState = new JSONObject(message);
     }
 
     private void connectToWebSocket(String ip, String port) {
@@ -65,9 +64,6 @@ public class ClientSocket {
             LOGGER.log(Level.SEVERE, null, ex);
             System.exit(-1);
         }
-        JSONObject json = new JSONObject();
-        json.append("Test", "Henk");
-        sendString("{'state':[{ 'traffic': 1, 'count' : 10}]}");
     }
 
     public void sendString(String text) {
@@ -77,5 +73,9 @@ public class ClientSocket {
         } catch (IOException ex) {
             Logger.getLogger(ClientSocket.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    public JSONObject getState(){
+        return lastState;
     }
 }

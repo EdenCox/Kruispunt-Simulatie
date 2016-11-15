@@ -18,8 +18,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.TilePane;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-import static javax.swing.text.html.HTML.Attribute.WIDTH;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class Kruispunt_Sim extends Application {
 
@@ -28,11 +31,11 @@ public class Kruispunt_Sim extends Application {
     Label[] labels;
     ClientSocket connection;
     Intersection intersection;
-    long timer = 0; 
+    long timer = 0;
 
     @Override
     public void start(final Stage primaryStage) {
-        //intersection = new Intersection();
+        intersection = new Intersection(connection);
         initialize(primaryStage);
     }
 
@@ -62,23 +65,26 @@ public class Kruispunt_Sim extends Application {
     public void initialize(final Stage primaryStage) {
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(10, 10, 10, 10));
-        grid.setMaxSize(40, 40);
-        grid.setVgap(0);
-        grid.setHgap(0);
+        grid.setMaxSize(100, 100);
+        grid.setVgap(1);
+        grid.setHgap(1);
         field = new TextField[23][26];
 
         for (int x = 0; x < field.length; x++) {
             for (int y = 0; y < field[0].length; y++) {
                 field[x][y] = new TextField();
-                field[x][y].setMaxHeight(10);
-                field[x][y].setMaxWidth(10);
-                field[x][y].setPrefSize(10, 10);
-                field[x][y].setPrefColumnCount(1);
+                field[x][y].setMaxHeight(75);
+                field[x][y].setMaxWidth(75);
+                field[x][y].setMinHeight(20);
+                field[x][y].setMinWidth(20);
+                //field[x][y].setPrefSize(50, 50);
+                field[x][y].setPrefColumnCount(2);
+                field[x][y].setFont(Font.font("Tahoma", FontWeight.BOLD, field[x][y].getFont().getSize() - 1));
                 field[x][y].setDisable(true);
                 grid.add(field[x][y], x, y);
             }
         }
-        
+
         ipFields = new TextField[5];
         labels = new Label[ipFields.length - 1];
         for (int i = 0; i < ipFields.length - 1; i++) {
@@ -92,12 +98,11 @@ public class Kruispunt_Sim extends Application {
         addTextLimiter(ipFields[ipFields.length - 1], 5);
         labels[labels.length - 1] = new Label();
         labels[labels.length - 1].setText(":");
-        
-        field[11][13].setText("Test");
-        ipFields[0].setText("321");
-        
+
+        ipFields[4].setText("8080");
+
         //intersection = new Intersection();
-        colorizeGrid();
+        updateGrid();
 
         TilePane tile = new TilePane();
         tile.setPadding(new Insets(10, 10, 10, 10));
@@ -112,7 +117,6 @@ public class Kruispunt_Sim extends Application {
             if (connection == null) {
                 connection = new ClientSocket(getIpString(), ipFields[4].getText());
                 btn.setText("Disconnect");
-                //connection.sendString("Test 1 2 3");
             } else {
                 connection = null;
                 btn.setText("Connect");
@@ -135,10 +139,11 @@ public class Kruispunt_Sim extends Application {
         primaryStage.setScene(scene);
         primaryStage.setMaximized(true);
         primaryStage.show();
-        
+
         //0  1000000
         new AnimationTimer() {
-            @Override public void handle(long currentNanoTime) {
+            @Override
+            public void handle(long currentNanoTime) {
                 //System.out.println(currentNanoTime);
                 timer++;
                 if (timer > 60) {
@@ -152,19 +157,20 @@ public class Kruispunt_Sim extends Application {
     }
 
     private void colorizeGrid() {
-        intersection = new Intersection();
         for (int x = 0; x < field.length; x++) {
             for (int y = 0; y < field[0].length; y++) {
                 field[x][y].setStyle(intersection.getColorCode(x, y));
             }
         }
     }
-    
-    private void updateGrid(){
-        colorizeGrid();
-        for (int x = 0; x < field.length; x++) {
-            for (int y = 0; y < field[0].length; y++) {
-                field[x][y].setText(intersection.getLetterCode(x, y));
+
+    private void updateGrid() {
+        if (intersection != null) {
+            colorizeGrid();
+            for (int x = 0; x < field.length; x++) {
+                for (int y = 0; y < field[0].length; y++) {
+                    field[x][y].setText(intersection.getLetterCode(x, y));
+                }
             }
         }
     }

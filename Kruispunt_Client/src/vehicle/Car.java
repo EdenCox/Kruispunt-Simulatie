@@ -31,7 +31,9 @@ public class Car implements Vehicle {
 
     @Override
     public void update() {
+
         if (currentPosition + 1 >= route.size()) {
+            System.out.println("Car Removed");
             route.get(currentPosition).removeVehicle();
             vehicles.remove(this);
         } else if (route.get(currentPosition + 1).isAvailable()) {

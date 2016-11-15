@@ -13,7 +13,7 @@ import vehicle.Vehicle;
  */
 public class RoadNode implements TrafficNode{
 
-    Vehicle vehicle;
+    private Vehicle vehicle;
     
     public RoadNode(){}
     
@@ -53,7 +53,7 @@ public class RoadNode implements TrafficNode{
     
     @Override
     public boolean isAvailable() {
-        return hasVehicle();
+        return !hasVehicle();
     }
     
 }

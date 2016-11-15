@@ -2,6 +2,20 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/Nodes/TrafficLight.java</file>
+            <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/vehicle/Car.java</file>
+            <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/Nodes/Empty.java</file>
+            <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/vehicle/Vehicle.java</file>
+            <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/Nodes/RoadNode.java</file>
+            <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/kruispunt_sim/Intersection.java</file>
+            <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/kruispunt_sim/ClientSocket.java</file>
+            <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/Nodes/TrafficNode.java</file>
+            <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/Nodes/Light.java</file>
+            <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/Nodes/TrainTrack.java</file>
+            <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/kruispunt_sim/Kruispunt_Sim.java</file>
+            <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/Nodes/BicycleLane.java</file>
+            <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/Nodes/Sidewalk.java</file>
+        </group>
     </open-files>
 </project-private>

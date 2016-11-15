@@ -13,7 +13,7 @@ import vehicle.Vehicle;
  */
 public class TrainTrack implements TrafficNode {
 
-    Vehicle vehicle;
+    private Vehicle vehicle;
 
     @Override
     public void placeVehicle(Vehicle vehicle) {

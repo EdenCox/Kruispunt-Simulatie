@@ -13,7 +13,7 @@ import vehicle.Vehicle;
  */
 public class Sidewalk implements TrafficNode {
 
-    Vehicle vehicle;
+    private Vehicle vehicle;
 
     @Override
     public void placeVehicle(Vehicle vehicle) {
@@ -51,7 +51,7 @@ public class Sidewalk implements TrafficNode {
     
     @Override
     public boolean isAvailable() {
-        return hasVehicle();
+        return !hasVehicle();
     }
 
 }
