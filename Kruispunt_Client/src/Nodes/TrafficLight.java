@@ -77,7 +77,7 @@ public class TrafficLight implements TrafficNode {
             case "green":
                 this.light = Light.Green;
                 break;
-            case "yellow":
+            case "orange":
                 this.light = Light.Yellow;
                 break;
             case "red":
