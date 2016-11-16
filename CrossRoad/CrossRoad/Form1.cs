@@ -25,8 +25,8 @@ namespace CrossRoad
         private DateTime previousTimestamp;
         private bool firstRun = true;
 
-        private int maxGreenTime = 30000;
-        private int maxOrangeTime = 10000;
+        private int maxGreenTime = 3000;//30000
+        private int maxOrangeTime = 1000;//10000
         private int maxWaitingTime = 120000;
         private int lastIndex = 0;
 
@@ -82,7 +82,6 @@ namespace CrossRoad
                             r.status = Status.red;
                             r.changed = true;
                             r.milliSec = 0;
-                            safeToCross = false;
                         }
                     }
                     /*
