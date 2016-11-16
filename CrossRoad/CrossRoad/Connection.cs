@@ -232,7 +232,11 @@ namespace CrossRoad
         }
 
         public void writeToClient(string message) {
-            client.Client.Send(System.Text.Encoding.UTF8.GetBytes(message));
+            if(client != null) {
+                byte[] msg = Encoding.UTF8.GetBytes(message);
+                Debug.Write(Environment.NewLine + "Debug: " + message + Environment.NewLine);
+                client.Client.Send(WebSocketHelper.EncodeMessageToSend(message));
+            }
         }
 
         public void stopListener() {

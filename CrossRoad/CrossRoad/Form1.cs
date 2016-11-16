@@ -82,7 +82,7 @@ namespace CrossRoad
                             r.status = Status.red;
                             r.changed = true;
                             r.milliSec = 0;
-                            safeToCross = true;
+                            safeToCross = false;
                         }
                     }
                     /*
@@ -125,7 +125,7 @@ namespace CrossRoad
             if(changedRoads.Count != 0) {
                 string msg = "{'state':[";
                 for (int i = 0; i < changedRoads.Count; i++) {
-                    msg += "'trafficLight: '" + changedRoads.ElementAt(i).trafficLight + ",";
+                    msg += "{'trafficLight':" + changedRoads.ElementAt(i).trafficLight + ",";
                     msg += "'status': " + changedRoads.ElementAt(i).status.ToString().ToLower() + "}";
                     msg += (i != changedRoads.Count -1) ? "," : "";
                     
@@ -133,6 +133,17 @@ namespace CrossRoad
                 msg += "]}";
                 connection.writeToClient(msg);
             }
+            /*
+            string msg = "{'state':[";
+            for (int i = 0; i < roads.Count; i++)
+            {
+                msg += "{'trafficLight: '" + roads.ElementAt(i).trafficLight + ",";
+                msg += "'status': " + roads.ElementAt(i).status.ToString().ToLower() + "}";
+                msg += (i != roads.Count - 1) ? "," : "";
+            }
+            msg += "]}";
+            connection.writeToClient(msg);
+            */
         }
 
         private Tuple<int, List<int>> getCollisionTuple(int trafficID) {
@@ -169,7 +180,7 @@ namespace CrossRoad
             for(int i =1; i <= carLanes; i++){
                 roads.Add(new Road(i, Status.red, 0));
             }
-
+            /*
             for(int i = 21; i <= bikeLanes; i++){
                 roads.Add(new Road(i, Status.red, 0));
             }
@@ -183,6 +194,7 @@ namespace CrossRoad
 
             //train
             roads.Add(new Road(45, Status.red, 0));
+            */
         }
 
         private void populateCollisionGraph() {
@@ -196,6 +208,7 @@ namespace CrossRoad
             collisionGraph.Add(Tuple.Create(8, new List<int>() { 2, 4, 26, 27, 36, 37, 42 }));
             collisionGraph.Add(Tuple.Create(9, new List<int>() { 2, 4, 5, 6, 27, 37, 42, 45 }));
             collisionGraph.Add(Tuple.Create(10, new List<int>() { 2, 3, 6, 7, 22, 27, 32 ,37 ,42 }));
+            /*
             //bikeLane
             collisionGraph.Add(Tuple.Create(21, new List<int>() { 1, 2, 42}));
             collisionGraph.Add(Tuple.Create(22, new List<int>() { 3, 6, 10 }));
@@ -219,6 +232,7 @@ namespace CrossRoad
 
             //Train
             collisionGraph.Add(Tuple.Create(45, new List<int>() { 3, 4, 5, 10, 23, 24, 33, 34 }));
+            */
         }
 
         private void buttonStartListener_Click(object sender, EventArgs e)
