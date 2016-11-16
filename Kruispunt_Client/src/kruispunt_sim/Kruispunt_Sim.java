@@ -93,7 +93,7 @@ public class Kruispunt_Sim extends Application {
             labels[i].setText(".");
         }
         ipFields[ipFields.length - 1] = new TextField();
-        addTextLimiter(ipFields[ipFields.length - 1], 5);
+        //addTextLimiter(ipFields[ipFields.length - 1], 5);
         labels[labels.length - 1] = new Label();
         labels[labels.length - 1].setText(":");
 

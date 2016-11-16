@@ -71,16 +71,19 @@ public class Intersection {
             connection.sendString(json.toString());
         }
     }
-    
-    private void syncState(){
+
+    private void syncState() {
         if (connection != null) {
             JSONObject state = connection.getState();
-            JSONArray lightStates = state.getJSONArray("state");
-            for (int i = 0; i < lightStates.length(); i++) {
-                trafficlights[lightStates.getJSONObject(i).getInt("trafficLight")].setLight(lightStates.getJSONObject(i).getString("status"));
+            if (state.has("state")) {
+                JSONArray lightStates = state.getJSONArray("state");
+                for (int i = 0; i < lightStates.length(); i++) {
+                    trafficlights[lightStates.getJSONObject(i).getInt("trafficLight")].setLight(lightStates.getJSONObject(i).getString("status"));
+                }
             }
+
         }
-        
+
     }
 
     private void initilizeIntersection() {
