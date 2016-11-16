@@ -82,6 +82,7 @@ namespace CrossRoad
                             r.status = Status.red;
                             r.changed = true;
                             r.milliSec = 0;
+                            safeToCross = true;
                         }
                     }
                     /*
