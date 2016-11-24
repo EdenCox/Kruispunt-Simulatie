@@ -25,18 +25,18 @@ namespace CrossRoad
         private DateTime previousTimestamp;
         private bool firstRun = true;
 
-        private int maxGreenTime = 3000;//30000
-        private int maxOrangeTime = 1000;//10000
+        private int maxGreenTime = 30000;//30000 // in het echt 30 sec
+        private int maxOrangeTime = 3500;//10000 // in het echt 3.5 sec 
+        private int maxClearingTime = 2000;//ontruiminstijd 1 a 2 sec
         private int maxWaitingTime = 120000;
+
+        private int currentClearingTime = 0;
         private int lastIndex = 0;
 
         public Form1()
         {
             InitializeComponent();
-            roads = new List<Road>();
-            stateQueue = new List<State>();
             collisionGraph = new List<Tuple<int, List<int>>>();
-            populateRoads();
             populateCollisionGraph();
             connection = new Connection();
         }
@@ -54,6 +54,7 @@ namespace CrossRoad
                         }
                     }//end foreach
                 }//end if     
+
                 int difference = 0;
                 if (firstRun) 
                     previousTimestamp = DateTime.Now;  
@@ -61,6 +62,7 @@ namespace CrossRoad
                     difference = ((TimeSpan)(DateTime.Now - previousTimestamp)).Milliseconds;
                     previousTimestamp = DateTime.Now;
                 }
+
                 firstRun = false;
                 bool safeToCross = true;
                 foreach (Road r in roads){
@@ -89,22 +91,51 @@ namespace CrossRoad
 */
                 }//end red and orange
 
-                //todo check if train is waiting, it has priority
+                //wait until the crossroad has been cleared
+                if (safeToCross && currentClearingTime < maxClearingTime) {
+                    currentClearingTime += difference;
+                }
 
-                if (safeToCross) {
-                    for (int i = 0; i < roads.Count; i++) { 
-                        if (roads.ElementAt((i)).count > 0)
-                        {
-                            //if (roads.ElementAt((lastIndex + i) % roads.Count).count > 0) {
-//                            Tuple<int,List<int>> collision = getCollisionTuple((lastIndex + i) % roads.Count);
-                            Tuple<int, List<int>> collision = getCollisionTuple(roads.ElementAt((i)).trafficLight);
-
+                //begin green light
+                else if (safeToCross) {
+                    currentClearingTime = 0;//reset the clearing time
+                    bool priority = false;
+                    foreach(Road r in roads)
+                    {
+                        if (r.trafficLight == 45 && r.count > 0) {//train has priority
+                            priority = true;
+                            List<int> collision = getCollisionTuple(r.trafficLight).Item2;
                             giveNonCollisionGreenLight(collision);
-                            lastIndex = lastIndex + i + 1 % roads.Count;
+                            safeToCross = false;
+                            break;
+                        }
+                        if (r.trafficLight == 42 && r.count > 0) {//bus  has priority
+                            priority = true;
+                            List<int> collision = getCollisionTuple(r.trafficLight).Item2;
+                            giveNonCollisionGreenLight(collision);
+                            safeToCross = false;
                             break;
                         }
                     }
-                    safeToCross = false;
+
+                    if (!priority) {
+                        for (int i = 0; i < roads.Count; i++) {
+                            int mod = (lastIndex + i) % roads.Count;//give each road an equal change of green
+
+                            if (roads.ElementAt(mod).count > 0)
+                            {
+                                //if (roads.ElementAt((i)).count > 0)
+                                //{
+                                //List<int> collision = getCollisionTuple(roads.ElementAt((i)).trafficLight).Item2;
+                                List<int> collision = getCollisionTuple(roads.ElementAt((mod)).trafficLight).Item2;
+
+                                giveNonCollisionGreenLight(collision);
+                                lastIndex = (mod + 1) % roads.Count;//prevent out of index
+                                safeToCross = false;
+                                break;
+                            }
+                        }
+                    }
                 }//end green light
 
                 //write all changes to Client
@@ -114,36 +145,27 @@ namespace CrossRoad
 
         private void writeToClient() {
             List<Road> changedRoads = new List<Road>();
-            
+            //old legacy code, needs to be revamped
             foreach (Road r in roads) {
                 if (r.changed) {
                     //todo add to JSON
                     changedRoads.Add(r);
                     r.changed = false;
                 }
-            }
+            }//end legacy code
+
             if(changedRoads.Count != 0) {
                 string msg = "{'state':[";
-                for (int i = 0; i < changedRoads.Count; i++) {
-                    msg += "{'trafficLight':" + changedRoads.ElementAt(i).trafficLight + ",";
-                    msg += "'status': " + changedRoads.ElementAt(i).status.ToString().ToLower() + "}";
-                    msg += (i != changedRoads.Count -1) ? "," : "";
+                for(int i = 0; i < roads.Count; i++) {
+                //for (int i = 0; i < changedRoads.Count; i++) {
+                    msg += "{'trafficLight':" + roads.ElementAt(i).trafficLight + ",";
+                    msg += "'status': " + "'"+ roads.ElementAt(i).status.ToString().ToLower() + "'"  + "}";
+                    msg += (i != roads.Count -1) ? "," : "";
                     
                 }
                 msg += "]}";
                 connection.writeToClient(msg);
             }
-            /*
-            string msg = "{'state':[";
-            for (int i = 0; i < roads.Count; i++)
-            {
-                msg += "{'trafficLight: '" + roads.ElementAt(i).trafficLight + ",";
-                msg += "'status': " + roads.ElementAt(i).status.ToString().ToLower() + "}";
-                msg += (i != roads.Count - 1) ? "," : "";
-            }
-            msg += "]}";
-            connection.writeToClient(msg);
-            */
         }
 
         private Tuple<int, List<int>> getCollisionTuple(int trafficID) {
@@ -155,10 +177,11 @@ namespace CrossRoad
             return null;
         }
 
-        private void giveNonCollisionGreenLight(Tuple<int, List<int>> collision) {
+        //potential todo: also add modifier to this function so it cycles
+        private void giveNonCollisionGreenLight(List<int> collision) {
             foreach (Road r in roads) {
                 bool inCollision = false;
-                foreach (int i in collision.Item2) {
+                foreach (int i in collision) {
                     if(r.trafficLight == i){
                         inCollision = true;
                         break;
@@ -168,6 +191,7 @@ namespace CrossRoad
                     r.status = Status.green;
                     r.changed = true;
                     r.milliSec = 0;
+                    collision.AddRange(getCollisionTuple(r.trafficLight).Item2); //update roads collisiongraph
                 }
             }
         }
@@ -180,7 +204,7 @@ namespace CrossRoad
             for(int i =1; i <= carLanes; i++){
                 roads.Add(new Road(i, Status.red, 0));
             }
-            /*
+            
             for(int i = 21; i <= bikeLanes; i++){
                 roads.Add(new Road(i, Status.red, 0));
             }
@@ -194,7 +218,7 @@ namespace CrossRoad
 
             //train
             roads.Add(new Road(45, Status.red, 0));
-            */
+            
         }
 
         private void populateCollisionGraph() {
@@ -208,7 +232,7 @@ namespace CrossRoad
             collisionGraph.Add(Tuple.Create(8, new List<int>() { 2, 4, 26, 27, 36, 37, 42 }));
             collisionGraph.Add(Tuple.Create(9, new List<int>() { 2, 4, 5, 6, 27, 37, 42, 45 }));
             collisionGraph.Add(Tuple.Create(10, new List<int>() { 2, 3, 6, 7, 22, 27, 32 ,37 ,42 }));
-            /*
+            
             //bikeLane
             collisionGraph.Add(Tuple.Create(21, new List<int>() { 1, 2, 42}));
             collisionGraph.Add(Tuple.Create(22, new List<int>() { 3, 6, 10 }));
@@ -232,13 +256,16 @@ namespace CrossRoad
 
             //Train
             collisionGraph.Add(Tuple.Create(45, new List<int>() { 3, 4, 5, 10, 23, 24, 33, 34 }));
-            */
+            
         }
 
         private void buttonStartListener_Click(object sender, EventArgs e)
         {
             buttonStartListener.Enabled = false;
             buttonStopListener.Enabled = true;
+            roads = new List<Road>();
+            stateQueue = new List<State>();
+            populateRoads();
             int port = int.Parse(this.textBoxPort.Text.Trim());
             connection.createHTTPListener(port);
             running = true;
@@ -253,6 +280,7 @@ namespace CrossRoad
             buttonStopListener.Enabled = false;
 
             connection.stopListener();
+
             running = false;
             mainThread.Abort();
         }
