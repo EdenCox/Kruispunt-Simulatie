@@ -33,7 +33,7 @@ public class Kruispunt_Sim extends Application {
 
     @Override
     public void start(final Stage primaryStage) {
-        //intersection = new Intersection(connection);
+        intersection = new Intersection(connection);
         initialize(primaryStage);
     }
 
@@ -89,7 +89,7 @@ public class Kruispunt_Sim extends Application {
             ipFields[i] = new TextField();
             ipFields[i].setMaxWidth(50);
             labels[i] = new Label();
-            addTextLimiter(ipFields[i], 3);
+            //addTextLimiter(ipFields[i], 3);
             labels[i].setText(".");
         }
         ipFields[ipFields.length - 1] = new TextField();

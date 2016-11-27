@@ -57,7 +57,7 @@ public class ClientSocket {
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         try {
             URI uri = URI.create("ws://"+ip+":"+port);
-            //URI uri = URI.create("ws://echo.websocket.org");
+            //URI uri = URI.create("ws://0.tcp.ngrok.io:19325");
             container.connectToServer(this, uri);
         } catch (DeploymentException | IOException ex) {
             LOGGER.log(Level.SEVERE, null, ex);

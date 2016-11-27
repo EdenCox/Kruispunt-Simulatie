@@ -37,7 +37,7 @@ public class Sidewalk implements TrafficNode {
 
     @Override
     public String getColorCode() {
-        return "-fx-background-color: #EFF2D7;";
+        return "-fx-background-color: #f4c700;";
     }
     
     @Override

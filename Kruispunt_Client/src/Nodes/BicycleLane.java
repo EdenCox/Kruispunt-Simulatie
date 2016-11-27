@@ -37,7 +37,7 @@ public class BicycleLane implements TrafficNode{
 
     @Override
     public String getColorCode() {
-        return "-fx-background-color: #FFFFFF;";
+        return "-fx-background-color: #ffbbad;";
     }
 
     @Override

@@ -37,7 +37,7 @@ public class TrainTrack implements TrafficNode {
 
     @Override
     public String getColorCode() {
-        return "-fx-background-color: #F2B491;";
+        return "-fx-background-color: #ED7D31;";
     }
     
     @Override
