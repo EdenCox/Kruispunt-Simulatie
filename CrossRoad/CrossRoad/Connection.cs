@@ -87,9 +87,9 @@ namespace CrossRoad
 
         private void listenClient() {
             //wait untill a client has connected
-            while (client == null && running) ;
+            while (running && client == null);
             //wait until usefull data has been recieved
-            while (!client.GetStream().DataAvailable && running) ;
+            while (running && !client.GetStream().DataAvailable) ;
 
             while (running) {
                 if (handshakeDone) {
