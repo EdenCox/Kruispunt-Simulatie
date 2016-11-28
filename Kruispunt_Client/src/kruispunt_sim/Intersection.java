@@ -8,12 +8,15 @@ package kruispunt_sim;
 import Nodes.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import vehicle.Bicycle;
 import vehicle.Car;
 import vehicle.Pedestrian;
+import vehicle.Train;
 import vehicle.Vehicle;
 
 /**
@@ -22,8 +25,13 @@ import vehicle.Vehicle;
  */
 public class Intersection {
 
+    private final int carSpawnChance = 50;
+    private final int bicycleSpawnChance = 20;
+    private final int pedestrainSpawnChance = 20;
+    private final int trainSpawnChance = 5;
     private TrafficNode[][] intersection;
     private TrafficLight[] trafficlights;
+    private TrainTrack[] trainWaitingNodes;
     private final List<List<TrafficNode>> carRoutes = new ArrayList<>();
     private final List<List<TrafficNode>> pedestrianRoutes = new ArrayList<>();
     private final List<List<TrafficNode>> bicycleRoutes = new ArrayList<>();
@@ -47,23 +55,51 @@ public class Intersection {
     }
 
     public void Update() {
+
         for (int i = 0; i < vehicles.size(); i++) {
             vehicles.get(i).update();
         }
-//        if (15 < rand.nextInt(20) + 1) {
-//            int random = rand.nextInt(carRoutes.size());
-//            if (carRoutes.get(random).get(0).isAvailable()) {
-//                Vehicle vehicle = new Car(carRoutes.get(random), vehicles);
-//                vehicles.add(vehicle);
-//            }
-//        }
-        if (4 > rand.nextInt(20) + 1) {
+        if (carSpawnChance >= rand.nextInt(1000)) {
+            int random = rand.nextInt(carRoutes.size());
+            if (carRoutes.get(random).get(0).isAvailable()) {
+                Vehicle vehicle = new Car(carRoutes.get(random), vehicles);
+                vehicles.add(vehicle);
+            }
+        }
+        if (pedestrainSpawnChance >= rand.nextInt(1000)) {
             int random = rand.nextInt(pedestrianRoutes.size());
             if (pedestrianRoutes.get(random).get(0).isAvailable()) {
                 Vehicle vehicle = new Pedestrian(pedestrianRoutes.get(random), vehicles);
                 vehicles.add(vehicle);
             }
         }
+
+        if (bicycleSpawnChance >= rand.nextInt(1000)) {
+            int random = rand.nextInt(bicycleRoutes.size());
+            if (bicycleRoutes.get(random).get(0).isAvailable()) {
+                Vehicle vehicle = new Bicycle(bicycleRoutes.get(random), vehicles);
+                vehicles.add(vehicle);
+            }
+        }
+
+        if (trainSpawnChance >= rand.nextInt(1000)) {
+            boolean spawnTrain = true;
+            for (TrafficNode trafficNodes : trainRoutes.get(0)) {
+                if (trafficNodes.hasVehicle()) {
+                    spawnTrain = false;
+                    break;
+                }
+            }
+            int random = rand.nextInt(trainRoutes.size());
+            if (spawnTrain) {
+                for (int i = 3; i >= 0; i--) {
+                    Vehicle vehicle = new Train(trainRoutes.get(random).subList(i, trainRoutes.get(random).size()), vehicles);
+                    vehicles.add(vehicle);
+                }
+            }
+
+        }
+
         sendState();
         syncState();
     }
@@ -100,11 +136,15 @@ public class Intersection {
     private void initilizeIntersection() {
         intersection = new TrafficNode[23][26];
         trafficlights = new TrafficLight[46];
+        trainWaitingNodes = new TrainTrack[4];
         carRoutes.forEach((trafficNodes) -> {
             trafficNodes = new ArrayList<>();
         });
         for (int i = 0; i < trafficlights.length; i++) {
             trafficlights[i] = new TrafficLight();
+        }
+        for (int i = 0; i < trainWaitingNodes.length; i++) {
+            trainWaitingNodes[i] = new TrainTrack();
         }
 
         for (int x = 0; x < intersection.length; x++) {
@@ -142,7 +182,7 @@ public class Intersection {
         for (TrafficNode[] intersection1 : intersection) {
             intersection1[14] = new RoadNode();
         }
-        
+
         //All BicycleLane Nodes
         for (int i = 0; i < intersection[0].length; i++) {
             intersection[17][i] = new BicycleLane();
@@ -153,11 +193,11 @@ public class Intersection {
         for (int i = 18; i < intersection[0].length; i++) {
             intersection[6][i] = new BicycleLane();
         }
-        
+
         for (TrafficNode[] intersection1 : intersection) {
             intersection1[6] = new BicycleLane();
         }
-        
+
         //All Sidewalk Nodes
         for (int i = 0; i < intersection[0].length; i++) {
             intersection[15][i] = new Sidewalk();
@@ -168,11 +208,11 @@ public class Intersection {
         for (int i = 16; i < intersection[0].length; i++) {
             intersection[8][i] = new Sidewalk();
         }
-        
+
         for (TrafficNode[] intersection1 : intersection) {
             intersection1[8] = new Sidewalk();
         }
-        
+
         //All TrainTrack Nodes
         for (TrafficNode[] intersection1 : intersection) {
             intersection1[20] = new TrainTrack();
@@ -190,28 +230,26 @@ public class Intersection {
         intersection[9][4] = trafficlights[8];
         intersection[10][4] = trafficlights[9];
         intersection[11][4] = trafficlights[10];
-        
-         //Stoplights 21 t/m 28
-        intersection[15][13] =  trafficlights[21];
-        intersection[15][15] =  trafficlights[22];
-        intersection[15][21] =  trafficlights[23];
-        intersection[8][19] =  trafficlights[24];
-        intersection[7][11] =  trafficlights[25];
-        intersection[7][9] =  trafficlights[26];
-        intersection[12][8] =  trafficlights[27];
-        intersection[14][8] =  trafficlights[28];
-        
+
+        //Stoplights 21 t/m 28
+        intersection[15][13] = trafficlights[21];
+        intersection[15][15] = trafficlights[22];
+        intersection[15][21] = trafficlights[23];
+        intersection[8][19] = trafficlights[24];
+        intersection[7][11] = trafficlights[25];
+        intersection[7][9] = trafficlights[26];
+        intersection[12][8] = trafficlights[27];
+        intersection[14][8] = trafficlights[28];
+
         //Stoplights 31 t/m 38
-        intersection[17][13] =  trafficlights[31];
-        intersection[17][15] =  trafficlights[32];
-        intersection[17][21] =  trafficlights[33];
-        intersection[6][19] =  trafficlights[34];
-        intersection[5][11] =  trafficlights[35];
-        intersection[5][9] =  trafficlights[36];
-        intersection[12][6] =  trafficlights[37];
-        intersection[14][6] =  trafficlights[38];
-        
-        
+        intersection[17][13] = trafficlights[31];
+        intersection[17][15] = trafficlights[32];
+        intersection[17][21] = trafficlights[33];
+        intersection[6][19] = trafficlights[34];
+        intersection[5][11] = trafficlights[35];
+        intersection[5][9] = trafficlights[36];
+        intersection[12][6] = trafficlights[37];
+        intersection[14][6] = trafficlights[38];
 
         //Stoplight nodes 1 t/m 10 and 42
         trafficlights[42].setCollisionNodes(new TrafficNode[]{intersection[19][10], intersection[20][10], intersection[21][10], intersection[22][10]});
@@ -219,12 +257,33 @@ public class Intersection {
         trafficlights[2].setCollisionNodes(new TrafficNode[]{intersection[19][12], intersection[20][12], intersection[21][12], intersection[22][12]});
         trafficlights[3].setCollisionNodes(new TrafficNode[]{intersection[13][22], intersection[13][23], intersection[13][24], intersection[13][25]});
         trafficlights[4].setCollisionNodes(new TrafficNode[]{intersection[12][22], intersection[12][23], intersection[12][24], intersection[12][25]});
-        trafficlights[5].setCollisionNodes(new TrafficNode[]{ intersection[3][14], intersection[2][14], intersection[1][14], intersection[0][14]});
+        trafficlights[5].setCollisionNodes(new TrafficNode[]{intersection[3][14], intersection[2][14], intersection[1][14], intersection[0][14]});
         trafficlights[6].setCollisionNodes(new TrafficNode[]{intersection[3][13], intersection[2][13], intersection[1][13], intersection[0][13]});
         trafficlights[7].setCollisionNodes(new TrafficNode[]{intersection[3][12], intersection[2][12], intersection[1][12], intersection[0][12]});
         trafficlights[8].setCollisionNodes(new TrafficNode[]{intersection[9][3], intersection[9][2], intersection[9][1], intersection[9][0]});
         trafficlights[9].setCollisionNodes(new TrafficNode[]{intersection[10][3], intersection[10][2], intersection[10][1], intersection[10][0]});
         trafficlights[10].setCollisionNodes(new TrafficNode[]{intersection[11][3], intersection[11][2], intersection[11][1], intersection[11][0]});
+
+        //StopLight nodes 22,23,24,26,28 
+        trafficlights[22].setCollisionNodes(new TrafficNode[]{intersection[15][16], intersection[15][17], intersection[15][18], intersection[15][19], intersection[15][20]});
+        trafficlights[23].setCollisionNodes(new TrafficNode[]{intersection[15][22], intersection[15][23], intersection[15][24], intersection[15][25]});
+        trafficlights[24].setCollisionNodes(new TrafficNode[]{intersection[8][18], intersection[8][17], intersection[8][16], intersection[7][16], intersection[7][15]});
+        trafficlights[26].setCollisionNodes(new TrafficNode[]{intersection[7][8], intersection[7][7], intersection[7][6], intersection[7][5], intersection[7][4],
+            intersection[7][3], intersection[7][1], intersection[7][2], intersection[7][0]});
+        trafficlights[28].setCollisionNodes(new TrafficNode[]{intersection[15][8], intersection[16][8], intersection[17][8], intersection[18][8], intersection[19][8],
+            intersection[20][8], intersection[21][8], intersection[22][8]});
+
+        //StopLight nodes 32,33,34,36,38 
+        trafficlights[32].setCollisionNodes(new TrafficNode[]{intersection[17][16], intersection[17][17], intersection[17][18], intersection[17][19], intersection[17][20]});
+        trafficlights[33].setCollisionNodes(new TrafficNode[]{intersection[17][22], intersection[17][23], intersection[17][24], intersection[17][25]});
+        trafficlights[34].setCollisionNodes(new TrafficNode[]{intersection[6][18], intersection[5][18], intersection[5][17], intersection[5][16], intersection[5][15]});
+        trafficlights[36].setCollisionNodes(new TrafficNode[]{intersection[5][8], intersection[5][7], intersection[5][6], intersection[5][5], intersection[5][4],
+            intersection[5][3], intersection[5][1], intersection[5][2], intersection[5][0]});
+        trafficlights[38].setCollisionNodes(new TrafficNode[]{intersection[15][6], intersection[16][6], intersection[17][6], intersection[18][6], intersection[19][6],
+            intersection[20][6], intersection[21][6], intersection[22][6]});
+
+        //Train nodes
+        trafficlights[45].setCollisionNodes(new TrafficNode[]{trainWaitingNodes[3]});
 
         //route 1
         carRoutes.add(Arrays.asList(intersection[22][11], intersection[21][11], intersection[20][11], intersection[19][11],
@@ -296,31 +355,61 @@ public class Intersection {
                 intersection[11][11], intersection[11][12], intersection[11][13], intersection[11][14], intersection[12][14], intersection[13][14], intersection[14][14],
                 intersection[15][14], intersection[16][14], intersection[17][14], intersection[18][14], intersection[19][14],
                 intersection[20][14], intersection[21][14], intersection[22][14]));
-        
+
         //route 23
         pedestrianRoutes.add(Arrays.asList(intersection[15][25], intersection[15][24], intersection[15][23], intersection[15][22], intersection[15][21], intersection[15][20],
-                intersection[15][19], intersection[15][18], intersection[15][17], intersection[15][16], intersection[15][15],intersection[15][14], intersection[15][13],
-                intersection[15][12], intersection[15][11], intersection[15][10], intersection[15][9],intersection[15][8],intersection[15][7],
-                intersection[15][6],intersection[15][5], intersection[15][4], intersection[15][3], intersection[15][2], intersection[15][1], intersection[15][0]));
-        
+                intersection[15][19], intersection[15][18], intersection[15][17], intersection[15][16], intersection[15][15], intersection[15][14], intersection[15][13],
+                intersection[15][12], intersection[15][11], intersection[15][10], intersection[15][9], intersection[15][8], intersection[15][7],
+                intersection[15][6], intersection[15][5], intersection[15][4], intersection[15][3], intersection[15][2], intersection[15][1], intersection[15][0]));
+
         //route 24
         pedestrianRoutes.add(Arrays.asList(intersection[7][0], intersection[7][1], intersection[7][2], intersection[7][3], intersection[7][4], intersection[7][5],
-                intersection[7][6], intersection[7][7], intersection[7][8], intersection[7][9], intersection[7][10],intersection[7][11], intersection[7][12],
-                intersection[7][13], intersection[7][14], intersection[7][15], intersection[7][16], intersection[8][16], intersection[8][17],intersection[8][18],
+                intersection[7][6], intersection[7][7], intersection[7][8], intersection[7][9], intersection[7][10], intersection[7][11], intersection[7][12],
+                intersection[7][13], intersection[7][14], intersection[7][15], intersection[7][16], intersection[8][16], intersection[8][17], intersection[8][18],
                 intersection[8][19], intersection[8][20], intersection[8][21], intersection[8][22], intersection[8][23], intersection[8][24], intersection[8][25]));
-        
-         //route 28
-        pedestrianRoutes.add(Arrays.asList(intersection[22][8], intersection[21][8], intersection[20][8], intersection[19][8], intersection[18][8], intersection[17][8]
-        , intersection[16][8], intersection[15][8], intersection[14][8], intersection[13][8], intersection[12][8], intersection[11][8], intersection[10][8]
-        , intersection[9][8], intersection[8][8], intersection[7][8], intersection[6][8], intersection[5][8], intersection[4][8], intersection[3][8]
-        , intersection[2][8], intersection[1][8], intersection[0][8]));
-        
-        //todo add train route and bicycle route. update logics
-                
+
+        //route 28
+        pedestrianRoutes.add(Arrays.asList(intersection[22][8], intersection[21][8], intersection[20][8], intersection[19][8], intersection[18][8], intersection[17][8],
+                intersection[16][8], intersection[15][8], intersection[14][8], intersection[13][8], intersection[12][8], intersection[11][8], intersection[10][8],
+                intersection[9][8], intersection[8][8], intersection[7][8], intersection[6][8], intersection[5][8], intersection[4][8], intersection[3][8],
+                intersection[2][8], intersection[1][8], intersection[0][8]));
+
+        //route 33
+        bicycleRoutes.add(Arrays.asList(intersection[17][25], intersection[17][24], intersection[17][23], intersection[17][22], intersection[17][21], intersection[17][20],
+                intersection[17][19], intersection[17][18], intersection[17][17], intersection[17][16], intersection[17][15], intersection[17][14], intersection[17][13],
+                intersection[17][12], intersection[17][11], intersection[17][10], intersection[17][9], intersection[17][8], intersection[17][7],
+                intersection[17][6], intersection[17][5], intersection[17][4], intersection[17][3], intersection[17][2], intersection[17][1], intersection[17][0]));
+
+        //route 34
+        bicycleRoutes.add(Arrays.asList(intersection[5][0], intersection[5][1], intersection[5][2], intersection[5][3], intersection[5][4], intersection[5][5],
+                intersection[5][6], intersection[5][7], intersection[5][8], intersection[5][9], intersection[5][10], intersection[5][11], intersection[5][12],
+                intersection[5][13], intersection[5][14], intersection[5][15], intersection[5][16], intersection[5][17], intersection[5][18], intersection[6][18],
+                intersection[6][19], intersection[6][20], intersection[6][21], intersection[6][22], intersection[6][23], intersection[6][24], intersection[6][25]));
+
+        //route 38
+        bicycleRoutes.add(Arrays.asList(intersection[22][6], intersection[21][6], intersection[20][6], intersection[19][6], intersection[18][6], intersection[17][6],
+                intersection[16][6], intersection[15][6], intersection[14][6], intersection[13][6], intersection[12][6], intersection[11][6], intersection[10][6],
+                intersection[9][6], intersection[8][6], intersection[7][6], intersection[6][6], intersection[5][6], intersection[4][6], intersection[3][6],
+                intersection[2][6], intersection[1][6], intersection[0][6]));
+
         //route 42
-//        carRoutes.add(Arrays.asList(intersection[22][10], intersection[21][10], intersection[20][10], intersection[19][10], intersection[18][10],
-//                intersection[17][10], intersection[16][10], intersection[15][10], intersection[14][10], intersection[13][10], intersection[12][10],
-//                intersection[11][10], intersection[10][10], intersection[9][10], intersection[8][10], intersection[7][10], intersection[6][10],
-//                intersection[5][10], intersection[4][10], intersection[3][10], intersection[2][10], intersection[1][10], intersection[0][10]));
+        carRoutes.add(Arrays.asList(intersection[22][10], intersection[21][10], intersection[20][10], intersection[19][10], intersection[18][10],
+                intersection[17][10], intersection[16][10], intersection[15][10], intersection[14][10], intersection[13][10], intersection[12][10],
+                intersection[11][10], intersection[10][10], intersection[9][10], intersection[8][10], intersection[7][10], intersection[6][10],
+                intersection[5][10], intersection[4][10], intersection[3][10], intersection[2][10], intersection[1][10], intersection[0][10]));
+
+        //route 45
+        trainRoutes.add(Arrays.asList(trainWaitingNodes[0], trainWaitingNodes[1], trainWaitingNodes[2], trainWaitingNodes[3], trafficlights[45],
+                intersection[22][20], intersection[21][20], intersection[20][20], intersection[19][20], intersection[18][20], intersection[17][20],
+                intersection[16][20], intersection[15][20], intersection[14][20], intersection[13][20], intersection[12][20], intersection[11][20], intersection[10][20],
+                intersection[9][20], intersection[8][20], intersection[7][20], intersection[6][20], intersection[5][20], intersection[4][20], intersection[3][20],
+                intersection[2][20], intersection[1][20], intersection[0][20],trainWaitingNodes[0], trainWaitingNodes[1], trainWaitingNodes[2], trainWaitingNodes[3]));
+
+        trainRoutes.add(Arrays.asList(trainWaitingNodes[0], trainWaitingNodes[1], trainWaitingNodes[2], trainWaitingNodes[3], trafficlights[45],
+                intersection[0][20], intersection[1][20], intersection[2][20], intersection[3][20], intersection[4][20], intersection[5][20],
+                intersection[6][20], intersection[7][20], intersection[8][20], intersection[9][20], intersection[10][20], intersection[11][20], intersection[12][20],
+                intersection[13][20], intersection[14][20], intersection[15][20], intersection[16][20], intersection[17][20], intersection[18][20], intersection[19][20],
+                intersection[20][20], intersection[21][20], intersection[22][20],trainWaitingNodes[0], trainWaitingNodes[1], trainWaitingNodes[2], trainWaitingNodes[3]));
+
     }
 }

@@ -77,7 +77,7 @@ public class Kruispunt_Sim extends Application {
                 field[x][y].setMinWidth(20);
                 //field[x][y].setPrefSize(50, 50);
                 field[x][y].setPrefColumnCount(2);
-                field[x][y].setFont(Font.font("Tahoma", FontWeight.BOLD, field[x][y].getFont().getSize() - 1));
+                field[x][y].setFont(Font.font("Tahoma", FontWeight.BOLD, field[x][y].getFont().getSize() - 2));
                 field[x][y].setDisable(true);
                 grid.add(field[x][y], x, y);
             }
