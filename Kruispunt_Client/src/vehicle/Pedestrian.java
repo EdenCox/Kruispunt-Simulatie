@@ -17,6 +17,8 @@ public class Pedestrian implements Vehicle {
     private List<TrafficNode> route;
     private List<Vehicle> vehicles;
     private int currentPosition = 0;
+    private final int updateRate = 4;
+    private int updateTick = 0;
 
     public Pedestrian(List<TrafficNode> route, List<Vehicle> vehicles) {
         this.route = route;
@@ -31,15 +33,18 @@ public class Pedestrian implements Vehicle {
 
     @Override
     public void update() {
+        updateTick++;
+        if (updateTick >= updateRate) {
+            if (currentPosition + 1 >= route.size()) {
+                route.get(currentPosition).removeVehicle();
+                vehicles.remove(this);
+            } else if (route.get(currentPosition + 1).isAvailable()) {
+                route.get(currentPosition + 1).placeVehicle(this);
+                route.get(currentPosition).removeVehicle();
+                currentPosition++;
 
-        if (currentPosition + 1 >= route.size()) {
-            route.get(currentPosition).removeVehicle();
-            vehicles.remove(this);
-        } else if (route.get(currentPosition + 1).isAvailable()) {
-            route.get(currentPosition+1).placeVehicle(this);
-            route.get(currentPosition).removeVehicle();
-            currentPosition++;
-            
+            }
+            updateTick = 0;
         }
     }
 

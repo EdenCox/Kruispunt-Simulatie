@@ -100,11 +100,11 @@ public class Intersection {
 
         }
 
-        sendState();
-        syncState();
+//        sendState();
+//        syncState();
     }
 
-    private void sendState() {
+    public void sendState() {
         if (connection != null) {
             JSONObject json = new JSONObject();
             JSONArray state = new JSONArray();
@@ -114,12 +114,34 @@ public class Intersection {
                 henk.put("count", trafficlights[i].getCollisionCount());
                 state.put(henk);
             }
+            for (int i = 21; i < 29; i++) {
+                JSONObject henk = new JSONObject();
+                henk.put("trafficLight", i);
+                henk.put("count", trafficlights[i].getCollisionCount());
+                state.put(henk);
+            }
+            for (int i = 31; i < 39; i++) {
+                JSONObject henk = new JSONObject();
+                henk.put("trafficLight", i);
+                henk.put("count", trafficlights[i].getCollisionCount());
+                state.put(henk);
+            }
+            JSONObject henk = new JSONObject();
+            henk.put("trafficLight", 42);
+            henk.put("count", trafficlights[42].getCollisionCount());
+            state.put(henk);
+            
+            henk = new JSONObject();
+            henk.put("trafficLight", 45);
+            henk.put("count", trafficlights[45].getCollisionCount());
+            state.put(henk);
+            
             json.put("state", state);
             connection.sendString(json.toString());
         }
     }
 
-    private void syncState() {
+    public void syncState() {
         if (connection != null) {
             JSONObject state = connection.getState();
             if (state.has("state")) {
@@ -132,6 +154,7 @@ public class Intersection {
         }
 
     }
+    
 
     private void initilizeIntersection() {
         intersection = new TrafficNode[23][26];

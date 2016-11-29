@@ -147,10 +147,14 @@ public class Kruispunt_Sim extends Application {
                 //System.out.println(currentNanoTime);              
                 if (intersection != null) {
                     timer++;
-                    if (timer > 60) {
-                        timer = 0;
+                    if (timer % 15 == 0) {
                         intersection.Update();
                         updateGrid();
+                    }
+                    if (timer >= 60) {
+                        timer = 0;
+                        intersection.sendState();
+                        intersection.syncState();
                     }
                 }
             }

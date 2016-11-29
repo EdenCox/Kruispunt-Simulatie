@@ -17,6 +17,7 @@ public class Train implements Vehicle {
     private List<TrafficNode> route;
     private List<Vehicle> vehicles;
     private int currentPosition = 0;
+    
 
     public Train(List<TrafficNode> route, List<Vehicle> vehicles) {
         this.route = route;
