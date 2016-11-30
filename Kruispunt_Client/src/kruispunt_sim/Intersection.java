@@ -158,7 +158,7 @@ public class Intersection {
 
     private void initilizeIntersection() {
         intersection = new TrafficNode[23][26];
-        trafficlights = new TrafficLight[46];
+        trafficlights = new TrafficLight[47];
         trainWaitingNodes = new TrainTrack[4];
         carRoutes.forEach((trafficNodes) -> {
             trafficNodes = new ArrayList<>();
