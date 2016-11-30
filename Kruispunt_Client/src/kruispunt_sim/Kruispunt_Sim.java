@@ -5,6 +5,9 @@
  */
 package kruispunt_sim;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -117,6 +120,11 @@ public class Kruispunt_Sim extends Application {
                 intersection = new Intersection(connection);
                 btn.setText("Disconnect");
             } else {
+                try {
+                    connection.closeConnection();
+                } catch (IOException ex) {
+                    Logger.getLogger(Kruispunt_Sim.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 connection = null;
                 intersection = null;
                 timer = 0;
