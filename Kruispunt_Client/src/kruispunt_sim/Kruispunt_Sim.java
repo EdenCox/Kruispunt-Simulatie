@@ -33,7 +33,7 @@ public class Kruispunt_Sim extends Application {
 
     @Override
     public void start(final Stage primaryStage) {
-        //intersection = new Intersection(connection);
+        intersection = new Intersection(connection);
         initialize(primaryStage);
     }
 
@@ -77,7 +77,7 @@ public class Kruispunt_Sim extends Application {
                 field[x][y].setMinWidth(20);
                 //field[x][y].setPrefSize(50, 50);
                 field[x][y].setPrefColumnCount(2);
-                field[x][y].setFont(Font.font("Tahoma", FontWeight.BOLD, field[x][y].getFont().getSize() - 1));
+                field[x][y].setFont(Font.font("Tahoma", FontWeight.BOLD, field[x][y].getFont().getSize() - 2));
                 field[x][y].setDisable(true);
                 grid.add(field[x][y], x, y);
             }
@@ -89,7 +89,7 @@ public class Kruispunt_Sim extends Application {
             ipFields[i] = new TextField();
             ipFields[i].setMaxWidth(50);
             labels[i] = new Label();
-            addTextLimiter(ipFields[i], 3);
+            //addTextLimiter(ipFields[i], 3);
             labels[i].setText(".");
         }
         ipFields[ipFields.length - 1] = new TextField();
@@ -147,10 +147,14 @@ public class Kruispunt_Sim extends Application {
                 //System.out.println(currentNanoTime);              
                 if (intersection != null) {
                     timer++;
-                    if (timer > 60) {
-                        timer = 0;
+                    if (timer % 15 == 0) {
                         intersection.Update();
                         updateGrid();
+                    }
+                    if (timer >= 60) {
+                        timer = 0;
+                        intersection.sendState();
+                        intersection.syncState();
                     }
                 }
             }

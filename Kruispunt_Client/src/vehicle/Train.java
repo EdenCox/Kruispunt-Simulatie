@@ -12,13 +12,14 @@ import java.util.List;
  *
  * @author Eden
  */
-public class Car implements Vehicle {
+public class Train implements Vehicle {
 
     private List<TrafficNode> route;
     private List<Vehicle> vehicles;
     private int currentPosition = 0;
+    
 
-    public Car(List<TrafficNode> route, List<Vehicle> vehicles) {
+    public Train(List<TrafficNode> route, List<Vehicle> vehicles) {
         this.route = route;
         this.vehicles = vehicles;
         route.get(currentPosition).placeVehicle(this);
@@ -45,7 +46,7 @@ public class Car implements Vehicle {
 
     @Override
     public String getType() {
-        return "C";
+        return "T";
     }
 
 }

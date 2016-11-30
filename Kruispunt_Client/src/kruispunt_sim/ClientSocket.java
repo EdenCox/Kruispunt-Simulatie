@@ -56,8 +56,8 @@ public class ClientSocket {
     private void connectToWebSocket(String ip, String port) {
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         try {
-            URI uri = URI.create("ws://"+ip+":"+port);
-            //URI uri = URI.create("ws://echo.websocket.org");
+            URI uri = URI.create("ws://" + ip + ":" + port);
+            //URI uri = URI.create("ws://0.tcp.ngrok.io:19325");
             container.connectToServer(this, uri);
         } catch (DeploymentException | IOException ex) {
             LOGGER.log(Level.SEVERE, null, ex);
@@ -69,12 +69,16 @@ public class ClientSocket {
         try {
             session.getBasicRemote().sendText(text);
             System.out.println(text + " has been send");
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             Logger.getLogger(ClientSocket.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    public JSONObject getState(){
+
+    public JSONObject getState() {
         return lastState;
+    }
+
+    public void closeConnection() throws IOException {
+        session.close();
     }
 }
