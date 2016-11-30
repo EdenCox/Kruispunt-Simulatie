@@ -30,7 +30,7 @@ namespace CrossRoad
         public void createHTTPListener(int port) {
             this.port = port;
             this.handshakeDone = false;
-            server = new TcpListener(IPAddress.Any, port);
+            server = new TcpListener(IPAddress.Parse("0.0.0.0"), port);//IPAddress.Any
             server.Start();
             acceptThread = new Thread(new ThreadStart(acceptClient));
             try {

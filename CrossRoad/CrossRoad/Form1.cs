@@ -25,7 +25,7 @@ namespace CrossRoad
         private DateTime previousTimestamp;
         private bool firstRun = true;
 
-        private int maxGreenTime = 30000;//30000 // in het echt 30 sec
+        private int maxGreenTime = 5000;//30000 // in het echt 30 sec
         private int maxOrangeTime = 3500;//10000 // in het echt 3.5 sec 
         private int maxClearingTime = 2000;//ontruiminstijd 1 a 2 sec
         private int maxWaitingTime = 120000;
@@ -65,6 +65,7 @@ namespace CrossRoad
 
                 firstRun = false;
                 bool safeToCross = true;
+
                 foreach (Road r in roads){
                     if (r.status == Status.green)
                     {
@@ -104,6 +105,10 @@ namespace CrossRoad
                     {
                         if (r.trafficLight == 45 && r.count > 0) {//train has priority
                             priority = true;
+                            r.status = Status.green;
+                            r.changed = true;
+                            r.milliSec = 0;
+
                             List<int> collision = getCollisionTuple(r.trafficLight).Item2;
                             giveNonCollisionGreenLight(collision);
                             safeToCross = false;
@@ -111,6 +116,10 @@ namespace CrossRoad
                         }
                         if (r.trafficLight == 42 && r.count > 0) {//bus  has priority
                             priority = true;
+                            r.status = Status.green;
+                            r.changed = true;
+                            r.milliSec = 0;
+
                             List<int> collision = getCollisionTuple(r.trafficLight).Item2;
                             giveNonCollisionGreenLight(collision);
                             safeToCross = false;
@@ -127,8 +136,11 @@ namespace CrossRoad
                                 //if (roads.ElementAt((i)).count > 0)
                                 //{
                                 //List<int> collision = getCollisionTuple(roads.ElementAt((i)).trafficLight).Item2;
-                                List<int> collision = getCollisionTuple(roads.ElementAt((mod)).trafficLight).Item2;
+                                roads.ElementAt(mod).status = Status.green;
+                                roads.ElementAt(mod).changed = true;
+                                roads.ElementAt(mod).milliSec = 0;
 
+                                List<int> collision = getCollisionTuple(roads.ElementAt((mod)).trafficLight).Item2;
                                 giveNonCollisionGreenLight(collision);
                                 lastIndex = (mod + 1) % roads.Count;//prevent out of index
                                 safeToCross = false;
@@ -146,6 +158,7 @@ namespace CrossRoad
         private void writeToClient() {
             List<Road> changedRoads = new List<Road>();
             //old legacy code, needs to be revamped
+
             foreach (Road r in roads) {
                 if (r.changed) {
                     //todo add to JSON
@@ -153,13 +166,13 @@ namespace CrossRoad
                     r.changed = false;
                 }
             }//end legacy code
-
+            
             if(changedRoads.Count != 0) {
                 string msg = "{'state':[";
                 for(int i = 0; i < roads.Count; i++) {
                 //for (int i = 0; i < changedRoads.Count; i++) {
                     msg += "{'trafficLight':" + roads.ElementAt(i).trafficLight + ",";
-                    msg += "'status': " + "'"+ roads.ElementAt(i).status.ToString().ToLower() + "'"  + "}";
+                    msg += "'status': " + "\"" + roads.ElementAt(i).status.ToString().ToLower() + "\"" + "}";
                     msg += (i != roads.Count -1) ? "," : "";
                     
                 }
