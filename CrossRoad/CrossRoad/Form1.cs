@@ -26,7 +26,7 @@ namespace CrossRoad
         private bool firstRun = true;
 
         private int maxServerPulseTime = 500; //2fps server heartbeat
-        private int maxGreenTime = 5000;//30000 // in het echt 30 sec
+        private int maxGreenTime = 3000;//30000 // in het echt 30 sec
         private int maxOrangeTime = 3500;//10000 // in het echt 3.5 sec 
         private int maxClearingTime = 2000;//ontruiminstijd 1 a 2 sec
         private int maxWaitingTime = 120000;
@@ -348,11 +348,11 @@ namespace CrossRoad
             collisionGraph.Add(Tuple.Create(37, new List<int>() { 8, 9, 10 }));
             collisionGraph.Add(Tuple.Create(38, new List<int>() { 1, 3, 7 }));
             //busLane
-            collisionGraph.Add(Tuple.Create(42, new List<int>() { 1, 3, 7, 8, 9, 10, 21, 22, 25, 26, 31, 32, 26, 35, 36  }));
+            collisionGraph.Add(Tuple.Create(42, new List<int>() { 1, 2, 3, 7, 8, 9, 10, 21, 22, 25, 26, 31, 32, 26, 35, 36  }));
 
             //Train
-            collisionGraph.Add(Tuple.Create(45, new List<int>() { 3, 4, 5, 10, 23, 24, 33, 34, 46 }));
-            collisionGraph.Add(Tuple.Create(46, new List<int>() { 3, 4, 5, 10, 23, 24, 33, 34, 45 }));
+            collisionGraph.Add(Tuple.Create(45, new List<int>() { 3, 4, 5, 9, 23, 24, 33, 34, 46 }));
+            collisionGraph.Add(Tuple.Create(46, new List<int>() { 3, 4, 5, 9, 23, 24, 33, 34, 45 }));
 
         }
 
