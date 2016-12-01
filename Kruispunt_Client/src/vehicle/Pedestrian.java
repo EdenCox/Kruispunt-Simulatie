@@ -47,7 +47,7 @@ public class Pedestrian implements Vehicle {
                     route.get(currentPosition).removeVehicle();
                     vehicles.remove(this);
                 }else if (route.get(currentPosition + 2).isAvailable()) {
-                    route.get(currentPosition + 1).placeVehicle(this);
+                    route.get(currentPosition + 2).placeVehicle(this);
                     route.get(currentPosition).removeVehicle();
                     currentPosition = currentPosition +2;
                 }            

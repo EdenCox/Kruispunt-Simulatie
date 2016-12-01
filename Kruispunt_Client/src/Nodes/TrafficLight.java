@@ -45,7 +45,7 @@ public class TrafficLight implements TrafficNode {
                 colorCode = "-fx-background-color: #0E9100;";
                 break;
             case Yellow:
-                colorCode = "-fx-background-color: #FCC511;";
+                colorCode = "-fx-background-color: #ff8c00;";
                 break;
             case Red:
                 colorCode = "-fx-background-color: #F70000;";
