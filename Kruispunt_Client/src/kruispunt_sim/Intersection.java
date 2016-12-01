@@ -99,42 +99,46 @@ public class Intersection {
             }
 
         }
-
-//        sendState();
-//        syncState();
     }
 
     public void sendState() {
         if (connection != null) {
             JSONObject json = new JSONObject();
+            JSONObject light;
             JSONArray state = new JSONArray();
             for (int i = 1; i < 11; i++) {
-                JSONObject henk = new JSONObject();
-                henk.put("trafficLight", i);
-                henk.put("count", trafficlights[i].getCollisionCount());
-                state.put(henk);
+                light = new JSONObject();
+                light.put("trafficLight", i);
+                light.put("count", trafficlights[i].getCollisionCount());
+                state.put(light);
             }
             for (int i = 21; i < 29; i++) {
-                JSONObject henk = new JSONObject();
-                henk.put("trafficLight", i);
-                henk.put("count", trafficlights[i].getCollisionCount());
-                state.put(henk);
+                light = new JSONObject();
+                light.put("trafficLight", i);
+                light.put("count", trafficlights[i].getCollisionCount());
+                state.put(light);
             }
             for (int i = 31; i < 39; i++) {
-                JSONObject henk = new JSONObject();
-                henk.put("trafficLight", i);
-                henk.put("count", trafficlights[i].getCollisionCount());
-                state.put(henk);
+                light = new JSONObject();
+                light.put("trafficLight", i);
+                light.put("count", trafficlights[i].getCollisionCount());
+                state.put(light);
             }
-            JSONObject henk = new JSONObject();
-            henk.put("trafficLight", 42);
-            henk.put("count", trafficlights[42].getCollisionCount());
-            state.put(henk);
             
-            henk = new JSONObject();
-            henk.put("trafficLight", 45);
-            henk.put("count", trafficlights[45].getCollisionCount());
-            state.put(henk);
+            light = new JSONObject();
+            light.put("trafficLight", 42);
+            light.put("count", trafficlights[42].getCollisionCount());
+            state.put(light);
+            
+            light = new JSONObject();
+            light.put("trafficLight", 45);
+            light.put("count", trafficlights[45].getCollisionCount());
+            state.put(light);
+            
+            light = new JSONObject();
+            light.put("trafficLight", 46);
+            light.put("count", trafficlights[46].getCollisionCount());
+            state.put(light);
             
             json.put("state", state);
             connection.sendString(json.toString());
@@ -159,7 +163,7 @@ public class Intersection {
     private void initilizeIntersection() {
         intersection = new TrafficNode[23][26];
         trafficlights = new TrafficLight[47];
-        trainWaitingNodes = new TrainTrack[4];
+        trainWaitingNodes = new TrainTrack[5];
         carRoutes.forEach((trafficNodes) -> {
             trafficNodes = new ArrayList<>();
         });
@@ -307,6 +311,7 @@ public class Intersection {
 
         //Train nodes
         trafficlights[45].setCollisionNodes(new TrafficNode[]{trainWaitingNodes[3]});
+        trafficlights[46].setCollisionNodes(new TrafficNode[]{trainWaitingNodes[4]});
 
         //route 1
         carRoutes.add(Arrays.asList(intersection[22][11], intersection[21][11], intersection[20][11], intersection[19][11],
@@ -428,7 +433,8 @@ public class Intersection {
                 intersection[9][20], intersection[8][20], intersection[7][20], intersection[6][20], intersection[5][20], intersection[4][20], intersection[3][20],
                 intersection[2][20], intersection[1][20], intersection[0][20],trainWaitingNodes[0], trainWaitingNodes[1], trainWaitingNodes[2], trainWaitingNodes[3]));
 
-        trainRoutes.add(Arrays.asList(trainWaitingNodes[0], trainWaitingNodes[1], trainWaitingNodes[2], trainWaitingNodes[3], trafficlights[45],
+        //route 46
+        trainRoutes.add(Arrays.asList(trainWaitingNodes[0], trainWaitingNodes[1], trainWaitingNodes[2], trainWaitingNodes[4], trafficlights[46],
                 intersection[0][20], intersection[1][20], intersection[2][20], intersection[3][20], intersection[4][20], intersection[5][20],
                 intersection[6][20], intersection[7][20], intersection[8][20], intersection[9][20], intersection[10][20], intersection[11][20], intersection[12][20],
                 intersection[13][20], intersection[14][20], intersection[15][20], intersection[16][20], intersection[17][20], intersection[18][20], intersection[19][20],

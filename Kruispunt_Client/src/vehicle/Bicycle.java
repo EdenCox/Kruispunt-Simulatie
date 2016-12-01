@@ -42,7 +42,15 @@ public class Bicycle implements Vehicle {
                 route.get(currentPosition + 1).placeVehicle(this);
                 route.get(currentPosition).removeVehicle();
                 currentPosition++;
-
+            } else if (route.get(currentPosition + 1).hasVehicle()) {
+                if (currentPosition + 2 >= route.size()) {
+                    route.get(currentPosition).removeVehicle();
+                    vehicles.remove(this);
+                }else if (route.get(currentPosition + 2).isAvailable()) {
+                    route.get(currentPosition + 1).placeVehicle(this);
+                    route.get(currentPosition).removeVehicle();
+                    currentPosition = currentPosition +2;
+                }            
             }
             updateTick = 0;
         }

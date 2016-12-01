@@ -68,7 +68,7 @@ public class ClientSocket {
     public void sendString(String text) {
         try {
             session.getBasicRemote().sendText(text);
-            System.out.println(text + " has been send");
+            //System.out.println(text + " has been send");
         } catch (Exception ex) {
             Logger.getLogger(ClientSocket.class.getName()).log(Level.SEVERE, null, ex);
         }

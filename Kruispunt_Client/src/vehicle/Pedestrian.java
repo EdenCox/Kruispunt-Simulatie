@@ -15,7 +15,7 @@ import java.util.List;
 public class Pedestrian implements Vehicle {
 
     private List<TrafficNode> route;
-    private List<Vehicle> vehicles;
+    private final List<Vehicle> vehicles;
     private int currentPosition = 0;
     private final int updateRate = 4;
     private int updateTick = 0;
@@ -42,7 +42,15 @@ public class Pedestrian implements Vehicle {
                 route.get(currentPosition + 1).placeVehicle(this);
                 route.get(currentPosition).removeVehicle();
                 currentPosition++;
-
+            } else if (route.get(currentPosition + 1).hasVehicle()) {
+                if (currentPosition + 2 >= route.size()) {
+                    route.get(currentPosition).removeVehicle();
+                    vehicles.remove(this);
+                }else if (route.get(currentPosition + 2).isAvailable()) {
+                    route.get(currentPosition + 1).placeVehicle(this);
+                    route.get(currentPosition).removeVehicle();
+                    currentPosition = currentPosition +2;
+                }            
             }
             updateTick = 0;
         }
