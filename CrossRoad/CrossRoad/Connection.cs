@@ -186,9 +186,6 @@ namespace CrossRoad
 
                 if (len <= 125)
                 {
-
-                    //String data = Encoding.UTF8.GetString(bytes);
-                    //Debug.Log("len=" + len + "bytes[" + bytes.Length + "]=" + ByteArrayToString(bytes) + " data[" + data.Length + "]=" + data);
                     Debug.Write("len=" + len + " offset=" + offset);
                     Byte[] key = new Byte[] { bytes[offset + 2], bytes[offset + 3], bytes[offset + 4], bytes[offset + 5] };
                     Byte[] decoded = new Byte[len];

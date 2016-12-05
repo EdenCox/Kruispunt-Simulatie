@@ -25,13 +25,16 @@ namespace CrossRoad
         private DateTime previousTimestamp;
         private bool firstRun = true;
 
+        private int incrementLightTime = 2000; //adds seconds for greenlight
         private int maxServerPulseTime = 500; //2fps server heartbeat
         private int maxGreenTime = 3000;//30000 
         private int maxOrangeTime = 1000;//3500 // in het echt 3.5 sec 
         private int maxClearingTime = 2000;//ontruiminstijd 1 a 2 sec
         private int maxWaitingTime = 120000;// 2 min is max
 
+        private int currentWaitingTime = 0;
         private int currentClearingTime = 0;
+        private int currentMaxPedestrianCount = 0;
         private int pulseTime = 0;
         private int lastIndex = 0;
 
@@ -59,9 +62,14 @@ namespace CrossRoad
 
                 int difference = 0;
                 int heartBeatTimer = 0;
-                if (firstRun) 
-                    previousTimestamp = DateTime.Now;  
-                else{
+                
+                currentMaxPedestrianCount = 0;
+
+                if (firstRun){
+                    previousTimestamp = DateTime.Now;
+                    currentWaitingTime = maxGreenTime;
+                }
+                else {
                     difference = Convert.ToInt32(((TimeSpan)(DateTime.Now - previousTimestamp)).TotalMilliseconds);
                     //difference = ((TimeSpan)(DateTime.Now - previousTimestamp)).Milliseconds;
                     heartBeatTimer += difference;
@@ -77,8 +85,9 @@ namespace CrossRoad
                     {
                         r.milliSec += difference;
                         safeToCross = false;
-                        if (r.milliSec >= this.maxGreenTime)
+                        if (r.milliSec >= this.currentWaitingTime)//this.currentWaitingTime //this.maxGreenTime
                         {
+                            Debug.Write(this.currentWaitingTime);
                             r.status = Status.orange;
                             r.milliSec = 0;
                             r.changed = true;
@@ -96,7 +105,6 @@ namespace CrossRoad
                             holdPulse = true;
                         }
                     }
-
                 }//end red and orange
 
                 //wait until the crossroad has been cleared
@@ -107,6 +115,7 @@ namespace CrossRoad
                 //begin green light
                 else if (safeToCross) {
                     currentClearingTime = 0;//reset the clearing time
+                    currentWaitingTime = maxGreenTime;
                     bool priority = false;
                     foreach(Road r in roads)
                     {
@@ -147,7 +156,7 @@ namespace CrossRoad
                                 roads.ElementAt(mod).status = Status.green;
                                 roads.ElementAt(mod).changed = true;
                                 roads.ElementAt(mod).milliSec = 0;
-
+                                isPedestrian(roads.ElementAt(mod).trafficLight, roads.ElementAt(mod));
                                 List<int> collision = getCollisionTuple(roads.ElementAt((mod)).trafficLight).Item2;
                                 giveNonCollisionGreenLight(collision);
                                 Debug.Write("mod" + mod);
@@ -204,7 +213,12 @@ namespace CrossRoad
 
             }
             msg += "]}";
-            connection.writeToClient(msg);
+            try {
+                connection.writeToClient(msg);
+            }
+            catch (Exception e) {
+                stopListener();
+            }
             /*
             string msg = "{'state':[";
             for (int i = 0; i < roads.Count; i++)
@@ -242,19 +256,37 @@ namespace CrossRoad
                     roads.ElementAt(rI).status = Status.green;
                     roads.ElementAt(rI).changed = true;
                     roads.ElementAt(rI).milliSec = 0;
-                    collision.AddRange(getCollisionTuple(roads.ElementAt(rI).trafficLight).Item2); //update roads collisiongraph
+                    collision = addUnique(collision, getCollisionTuple(roads.ElementAt(rI).trafficLight).Item2);
+                    //collision.AddRange(getCollisionTuple(roads.ElementAt(rI).trafficLight).Item2); //update roads collisiongraph
                     List<int> temp = bikePedestrianLane(rI);
                     if (temp.Count > 0)
-                        collision.AddRange(temp);
+                        collision = addUnique(collision, temp);
+                    //collision.AddRange(temp);
                 }
             }
         }
 
-        private void AddUnique() {
-
+        private List<int> addUnique(List<int> source, List<int> toAdd) {
+            foreach (int i in toAdd) {
+                if (!source.Contains(i)) {
+                    source.Add(i);
+                }
+            }
+            return source;
         }
 
-        //some simulators park bikes and pedestrians on the road
+        private bool isPedestrian(int id, Road road) {
+            if (id > 30 && id < 40) {
+                if(road.count > currentMaxPedestrianCount){
+                    currentMaxPedestrianCount = road.count;
+                    currentWaitingTime = maxGreenTime + (road.count * incrementLightTime);
+                }
+                return true;
+            }
+            return false;
+        }
+
+        //some simulators park bikes and pedestrians on the road or lack a middle ground
         private List<int> bikePedestrianLane(int index) {
             int light = roads.ElementAt(index).trafficLight;
             int mod = -1;
@@ -295,12 +327,12 @@ namespace CrossRoad
                 case 38:
                     mod = index - 1;
                     break;
-
             }
             if (mod > -1){
                 roads.ElementAt(mod).status = Status.green;
                 roads.ElementAt(mod).changed = true;
                 roads.ElementAt(mod).milliSec = 0;
+                isPedestrian(roads.ElementAt(mod).trafficLight, roads.ElementAt(mod));
                 return getCollisionTuple(roads.ElementAt(mod).trafficLight).Item2;
             }
             return new List<int>();
@@ -333,20 +365,20 @@ namespace CrossRoad
         }
 
         private void populateCollisionGraph() {
-            collisionGraph.Add(Tuple.Create(1, new List<int>() { 3, 7, 21, 22, 27, 28, 31, 32, 37, 38, 42 }));
-            collisionGraph.Add(Tuple.Create(2, new List<int>() { 3, 4, 7, 8, 9, 10, 21, 22, 26, 31, 32, 36, 42 }));
-            collisionGraph.Add(Tuple.Create(3, new List<int>() { 1, 2, 6, 7, 10, 21, 22, 27, 28, 32, 37, 38, 42, 45, 46 }));
-            collisionGraph.Add(Tuple.Create(4, new List<int>() { 2, 6, 7, 8, 9, 25, 26, 36, 42, 45, 46 }));
-            collisionGraph.Add(Tuple.Create(5, new List<int>() { 9, 25, 35, 36, 45, 46 }));
-            collisionGraph.Add(Tuple.Create(6, new List<int>() { 3, 4, 9, 10, 22, 25, 26, 32, 35, 36}));
+            collisionGraph.Add(Tuple.Create(1, new List<int>() { 3, 7, 21, 22, 26, 27, 28, 31, 32, 37, 38, 42 }));
+            collisionGraph.Add(Tuple.Create(2, new List<int>() { 3, 4, 7, 8, 9, 10, 21, 22, 26, 31, 32, 35, 36, 42 }));
+            collisionGraph.Add(Tuple.Create(3, new List<int>() { 1, 2, 6, 7, 10, 21, 22, 27, 28, 31, 32, 37, 38, 42, 45, 46 }));
+            collisionGraph.Add(Tuple.Create(4, new List<int>() { 2, 6, 7, 8, 9, 25, 26, 35, 36, 42, 45, 46 }));
+            collisionGraph.Add(Tuple.Create(5, new List<int>() { 9, 25, 26, 35, 36, 45, 46 }));
+            collisionGraph.Add(Tuple.Create(6, new List<int>() { 3, 4, 9, 10, 21, 22, 25, 26, 31, 32, 35, 36}));
             collisionGraph.Add(Tuple.Create(7, new List<int>() { 1, 2, 3, 4, 9, 10, 25, 26, 27, 28, 35, 36, 37, 38, 42}));
             collisionGraph.Add(Tuple.Create(8, new List<int>() { 2, 4, 25, 26, 27, 28, 35, 36, 37, 38, 42 }));
-            collisionGraph.Add(Tuple.Create(9, new List<int>() { 2, 4, 5, 6, 27, 28, 37, 42, 45, 46 }));
+            collisionGraph.Add(Tuple.Create(9, new List<int>() { 2, 4, 5, 6, 27, 28, 37, 38, 42, 45, 46 }));
             collisionGraph.Add(Tuple.Create(10, new List<int>() { 2, 3, 6, 7, 21, 22, 27, 28, 31, 32 ,37, 38 ,42 }));
             
             //bikeLane
             collisionGraph.Add(Tuple.Create(21, new List<int>() { 1, 2, 42}));
-            collisionGraph.Add(Tuple.Create(22, new List<int>() { 3, 6, 10 }));
+            collisionGraph.Add(Tuple.Create(22, new List<int>() { 1, 3, 6, 10 }));
             collisionGraph.Add(Tuple.Create(23, new List<int>() { 45, 46 }));
             collisionGraph.Add(Tuple.Create(24, new List<int>() { 45, 46 }));
             collisionGraph.Add(Tuple.Create(25, new List<int>() { 4, 5, 6, 7}));
@@ -355,7 +387,7 @@ namespace CrossRoad
             collisionGraph.Add(Tuple.Create(28, new List<int>() { 1, 3, 7 }));
             //footpath
             collisionGraph.Add(Tuple.Create(31, new List<int>() { 1, 2, 42 }));
-            collisionGraph.Add(Tuple.Create(32, new List<int>() { 3, 6, 10 }));
+            collisionGraph.Add(Tuple.Create(32, new List<int>() { 1, 3, 6, 10 }));
             collisionGraph.Add(Tuple.Create(33, new List<int>() { 45, 46 }));
             collisionGraph.Add(Tuple.Create(34, new List<int>() { 45, 46 }));
             collisionGraph.Add(Tuple.Create(35, new List<int>() { 4, 5, 6, 7 }));
@@ -363,7 +395,7 @@ namespace CrossRoad
             collisionGraph.Add(Tuple.Create(37, new List<int>() { 8, 9, 10 }));
             collisionGraph.Add(Tuple.Create(38, new List<int>() { 1, 3, 7 }));
             //busLane
-            collisionGraph.Add(Tuple.Create(42, new List<int>() { 1, 2, 3, 7, 8, 9, 10, 21, 22, 25, 26, 31, 32, 26, 35, 36  }));
+            collisionGraph.Add(Tuple.Create(42, new List<int>() { 1, 2, 3, 7, 8, 9, 10, 21, 22, 25, 26, 31, 32, 35, 36  }));
 
             //Train
             collisionGraph.Add(Tuple.Create(45, new List<int>() { 3, 4, 5, 9, 23, 24, 33, 34, 46 }));
@@ -388,6 +420,10 @@ namespace CrossRoad
 
         private void buttonStopListener_Click(object sender, EventArgs e)
         {
+            stopListener();
+        }
+
+        private void stopListener() {
             buttonStartListener.Enabled = true;
             buttonStopListener.Enabled = false;
 
