@@ -26,10 +26,10 @@ namespace CrossRoad
         private bool firstRun = true;
 
         private int maxServerPulseTime = 500; //2fps server heartbeat
-        private int maxGreenTime = 3000;//30000 // in het echt 30 sec
+        private int maxGreenTime = 3000;//30000 
         private int maxOrangeTime = 3500;//10000 // in het echt 3.5 sec 
         private int maxClearingTime = 2000;//ontruiminstijd 1 a 2 sec
-        private int maxWaitingTime = 120000;
+        private int maxWaitingTime = 120000;// 2 min is max
 
         private int currentClearingTime = 0;
         private int pulseTime = 0;
@@ -163,7 +163,7 @@ namespace CrossRoad
                 //a simple server heartbeat to be compatible for some of the simulations
                 if (!holdPulse && heartBeatTimer > maxServerPulseTime)
                 {
-                    serverPulse();
+                    //serverPulse();
                     pulseTime = 0;
                 }
                 else if (holdPulse) {
@@ -194,6 +194,18 @@ namespace CrossRoad
         }
 
         private void serverPulse() {
+            string msg = "{" + "\""+ "state" + "\"" +":[";
+            for (int i = 0; i < roads.Count; i++)
+            {
+                //for (int i = 0; i < changedRoads.Count; i++) {
+                msg += "{" + "\"" + "trafficLight" + "\"" + ":" + roads.ElementAt(i).trafficLight + ",";
+                msg += "\"" + "status" + "\"" + ": " + "\"" + roads.ElementAt(i).status.ToString().ToLower() + "\"" + "}";
+                msg += (i != roads.Count - 1) ? "," : "";
+
+            }
+            msg += "]}";
+            connection.writeToClient(msg);
+            /*
             string msg = "{'state':[";
             for (int i = 0; i < roads.Count; i++)
             {
@@ -204,7 +216,7 @@ namespace CrossRoad
 
             }
             msg += "]}";
-            connection.writeToClient(msg);
+            connection.writeToClient(msg);*/
         }
 
         private Tuple<int, List<int>> getCollisionTuple(int trafficID) {
@@ -236,6 +248,7 @@ namespace CrossRoad
             }
         }
 
+        //some simulators park bikes and pedestrians on the road
         private List<int> bikePedestrianLane(int index) {
             int light = roads.ElementAt(index).trafficLight;
             int mod = -1;
@@ -334,7 +347,7 @@ namespace CrossRoad
             collisionGraph.Add(Tuple.Create(22, new List<int>() { 3, 6, 10 }));
             collisionGraph.Add(Tuple.Create(23, new List<int>() { 45, 46 }));
             collisionGraph.Add(Tuple.Create(24, new List<int>() { 45, 46 }));
-            collisionGraph.Add(Tuple.Create(25, new List<int>() { 5, 6, 7}));
+            collisionGraph.Add(Tuple.Create(25, new List<int>() { 4, 5, 6, 7}));
             collisionGraph.Add(Tuple.Create(26, new List<int>() { 2, 4, 8, 42}));
             collisionGraph.Add(Tuple.Create(27, new List<int>() { 8, 9, 10 }));
             collisionGraph.Add(Tuple.Create(28, new List<int>() { 1, 3, 7 }));
@@ -343,7 +356,7 @@ namespace CrossRoad
             collisionGraph.Add(Tuple.Create(32, new List<int>() { 3, 6, 10 }));
             collisionGraph.Add(Tuple.Create(33, new List<int>() { 45, 46 }));
             collisionGraph.Add(Tuple.Create(34, new List<int>() { 45, 46 }));
-            collisionGraph.Add(Tuple.Create(35, new List<int>() { 5, 6, 7 }));
+            collisionGraph.Add(Tuple.Create(35, new List<int>() { 4, 5, 6, 7 }));
             collisionGraph.Add(Tuple.Create(36, new List<int>() { 2, 4, 8, 42 }));
             collisionGraph.Add(Tuple.Create(37, new List<int>() { 8, 9, 10 }));
             collisionGraph.Add(Tuple.Create(38, new List<int>() { 1, 3, 7 }));
