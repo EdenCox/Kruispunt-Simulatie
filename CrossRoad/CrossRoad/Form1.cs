@@ -27,7 +27,7 @@ namespace CrossRoad
 
         private int maxServerPulseTime = 500; //2fps server heartbeat
         private int maxGreenTime = 3000;//30000 
-        private int maxOrangeTime = 3500;//10000 // in het echt 3.5 sec 
+        private int maxOrangeTime = 1000;//3500 // in het echt 3.5 sec 
         private int maxClearingTime = 2000;//ontruiminstijd 1 a 2 sec
         private int maxWaitingTime = 120000;// 2 min is max
 
@@ -62,7 +62,8 @@ namespace CrossRoad
                 if (firstRun) 
                     previousTimestamp = DateTime.Now;  
                 else{
-                    difference = ((TimeSpan)(DateTime.Now - previousTimestamp)).Milliseconds;
+                    difference = Convert.ToInt32(((TimeSpan)(DateTime.Now - previousTimestamp)).TotalMilliseconds);
+                    //difference = ((TimeSpan)(DateTime.Now - previousTimestamp)).Milliseconds;
                     heartBeatTimer += difference;
                     previousTimestamp = DateTime.Now;
                 }
@@ -95,8 +96,7 @@ namespace CrossRoad
                             holdPulse = true;
                         }
                     }
-                    /*
-*/
+
                 }//end red and orange
 
                 //wait until the crossroad has been cleared
@@ -243,9 +243,15 @@ namespace CrossRoad
                     roads.ElementAt(rI).changed = true;
                     roads.ElementAt(rI).milliSec = 0;
                     collision.AddRange(getCollisionTuple(roads.ElementAt(rI).trafficLight).Item2); //update roads collisiongraph
-                    collision.AddRange(bikePedestrianLane(rI));
+                    List<int> temp = bikePedestrianLane(rI);
+                    if (temp.Count > 0)
+                        collision.AddRange(temp);
                 }
             }
+        }
+
+        private void AddUnique() {
+
         }
 
         //some simulators park bikes and pedestrians on the road
@@ -298,10 +304,6 @@ namespace CrossRoad
                 return getCollisionTuple(roads.ElementAt(mod).trafficLight).Item2;
             }
             return new List<int>();
-            
-            //21 22  31 32
-            //25 26  35 36
-            //27 28  37 38
         }
 
         private void populateRoads() {
