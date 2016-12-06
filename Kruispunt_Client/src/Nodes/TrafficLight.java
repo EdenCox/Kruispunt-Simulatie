@@ -14,7 +14,7 @@ import vehicle.Vehicle;
 public class TrafficLight implements TrafficNode {
 
     private Vehicle vehicle;
-    private Light light = Light.Red;
+    protected Light light = Light.Red;
     private TrafficNode[] collisionNodes;
 
     @Override

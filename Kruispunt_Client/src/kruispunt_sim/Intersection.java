@@ -8,19 +8,15 @@ package kruispunt_sim;
 import Nodes.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import vehicle.Bicycle;
-import vehicle.Car;
-import vehicle.Pedestrian;
-import vehicle.Train;
-import vehicle.Vehicle;
+import vehicle.*;
+
 
 /**
- *
+ * This class is supposed to represent a real life intersection in leeuwarden.
  * @author Eden
  */
 public class Intersection {
@@ -28,79 +24,66 @@ public class Intersection {
     private final int carSpawnChance = 50;
     private final int bicycleSpawnChance = 20;
     private final int pedestrainSpawnChance = 20;
+    private final int busSpawnChance = 10;
     private final int trainSpawnChance = 5;
     private TrafficNode[][] intersection;
     private TrafficLight[] trafficlights;
-    private TrainTrack[] trainWaitingNodes;
+    private TrainTrack[] trainWaitingNodes;//offscreenNodes for the train.
     private final List<List<TrafficNode>> carRoutes = new ArrayList<>();
     private final List<List<TrafficNode>> pedestrianRoutes = new ArrayList<>();
     private final List<List<TrafficNode>> bicycleRoutes = new ArrayList<>();
     private final List<List<TrafficNode>> trainRoutes = new ArrayList<>();
+    private final List<List<TrafficNode>> busRoutes = new ArrayList<>();
     private final List<Vehicle> vehicles;
     private final Random rand = new Random();
-    private ClientSocket connection;
+    private final ClientSocket connection;
 
+    /***
+     * COnstructor of the class needs a Websocket connection to be able to send it's state.
+     * @param connection  Websocket connection
+     */
     public Intersection(ClientSocket connection) {
         this.connection = connection;
         vehicles = new ArrayList<>();
         initilizeIntersection();
     }
 
+    /***
+     * Returns a hexadecimal representation of a color of a node in the grid
+     * @param x 
+     * @param y
+     * @return 
+     */
     public String getColorCode(int x, int y) {
         return intersection[x][y].getColorCode();
     }
 
+     /***
+     * Returns a letter representation of a color of a node in the grid
+     * @param x 
+     * @param y
+     * @return 
+     */
     public String getLetterCode(int x, int y) {
         return intersection[x][y].getVehicleLetter();
     }
 
+    /***
+     * This method updates the intersection by one tick.
+     * The optimal way to run simulation is 4 ticks per second.
+     */
     public void Update() {
 
         for (int i = 0; i < vehicles.size(); i++) {
             vehicles.get(i).update();
         }
-        if (carSpawnChance >= rand.nextInt(1000)) {
-            int random = rand.nextInt(carRoutes.size());
-            if (carRoutes.get(random).get(0).isAvailable()) {
-                Vehicle vehicle = new Car(carRoutes.get(random), vehicles);
-                vehicles.add(vehicle);
-            }
-        }
-        if (pedestrainSpawnChance >= rand.nextInt(1000)) {
-            int random = rand.nextInt(pedestrianRoutes.size());
-            if (pedestrianRoutes.get(random).get(0).isAvailable()) {
-                Vehicle vehicle = new Pedestrian(pedestrianRoutes.get(random), vehicles);
-                vehicles.add(vehicle);
-            }
-        }
-
-        if (bicycleSpawnChance >= rand.nextInt(1000)) {
-            int random = rand.nextInt(bicycleRoutes.size());
-            if (bicycleRoutes.get(random).get(0).isAvailable()) {
-                Vehicle vehicle = new Bicycle(bicycleRoutes.get(random), vehicles);
-                vehicles.add(vehicle);
-            }
-        }
-
-        if (trainSpawnChance >= rand.nextInt(1000)) {
-            boolean spawnTrain = true;
-            for (TrafficNode trafficNodes : trainRoutes.get(0)) {
-                if (trafficNodes.hasVehicle()) {
-                    spawnTrain = false;
-                    break;
-                }
-            }
-            int random = rand.nextInt(trainRoutes.size());
-            if (spawnTrain) {
-                for (int i = 3; i >= 0; i--) {
-                    Vehicle vehicle = new Train(trainRoutes.get(random).subList(i, trainRoutes.get(random).size()), vehicles);
-                    vehicles.add(vehicle);
-                }
-            }
-
-        }
+        SpawnVehicle();
+        
     }
 
+    /***
+     * This method sends its current state to the Server
+     */
     public void sendState() {
         if (connection != null) {
             JSONObject json = new JSONObject();
@@ -145,6 +128,9 @@ public class Intersection {
         }
     }
 
+    /***
+     * This method takes the latest state from the server and syncs it with the intersection
+     */
     public void syncState() {
         if (connection != null) {
             JSONObject state = connection.getState();
@@ -159,7 +145,63 @@ public class Intersection {
 
     }
     
+    /***
+     * This method handles the spawning of all the vehicles in the simulation
+     */
+    private void SpawnVehicle(){
+        if (carSpawnChance >= rand.nextInt(1000)) {
+            int random = rand.nextInt(carRoutes.size());
+            if (carRoutes.get(random).get(0).isAvailable()) {
+                Vehicle vehicle = new Car(carRoutes.get(random), vehicles);
+                vehicles.add(vehicle);
+            }
+        }
+        if (busSpawnChance >= rand.nextInt(1000)) {
+            int random = rand.nextInt(busRoutes.size());
+            if (busRoutes.get(random).get(0).isAvailable()) {
+                Vehicle vehicle = new Bus(busRoutes.get(random), vehicles);
+                vehicles.add(vehicle);
+            }
+        }
+        if (pedestrainSpawnChance >= rand.nextInt(1000)) {
+            int random = rand.nextInt(pedestrianRoutes.size());
+            if (pedestrianRoutes.get(random).get(0).isAvailable()) {
+                Vehicle vehicle = new Pedestrian(pedestrianRoutes.get(random), vehicles);
+                vehicles.add(vehicle);
+            }
+        }
 
+        if (bicycleSpawnChance >= rand.nextInt(1000)) {
+            int random = rand.nextInt(bicycleRoutes.size());
+            if (bicycleRoutes.get(random).get(0).isAvailable()) {
+                Vehicle vehicle = new Bicycle(bicycleRoutes.get(random), vehicles);
+                vehicles.add(vehicle);
+            }
+        }
+
+        if (trainSpawnChance >= rand.nextInt(1000)) {
+            boolean spawnTrain = true;
+            for (TrafficNode trafficNodes : trainRoutes.get(0)) {
+                if (trafficNodes.hasVehicle()) {
+                    spawnTrain = false;
+                    break;
+                }
+            }
+            int random = rand.nextInt(trainRoutes.size());
+            if (spawnTrain) {
+                for (int i = 3; i >= 0; i--) {
+                    Vehicle vehicle = new Train(trainRoutes.get(random).subList(i, trainRoutes.get(random).size()), vehicles);
+                    vehicles.add(vehicle);
+                }
+            }
+
+        }
+    }
+
+    /***
+     * This method takes care of the initialization of the intersection
+     * All the Nodes en Routes are being set in this method.
+     */
     private void initilizeIntersection() {
         intersection = new TrafficNode[23][26];
         trafficlights = new TrafficLight[47];
@@ -170,6 +212,14 @@ public class Intersection {
         for (int i = 0; i < trafficlights.length; i++) {
             trafficlights[i] = new TrafficLight();
         }
+        //
+        trafficlights[21] = new SecondTrafficLight();
+        trafficlights[25] = new SecondTrafficLight();
+        trafficlights[27] = new SecondTrafficLight();
+        trafficlights[31] = new SecondTrafficLight();
+        trafficlights[35] = new SecondTrafficLight();
+        trafficlights[37] = new SecondTrafficLight();
+            
         for (int i = 0; i < trainWaitingNodes.length; i++) {
             trainWaitingNodes[i] = new TrainTrack();
         }
@@ -421,7 +471,7 @@ public class Intersection {
                 intersection[2][6], intersection[1][6], intersection[0][6]));
 
         //route 42
-        carRoutes.add(Arrays.asList(intersection[22][10], intersection[21][10], intersection[20][10], intersection[19][10], intersection[18][10],
+        busRoutes.add(Arrays.asList(intersection[22][10], intersection[21][10], intersection[20][10], intersection[19][10], intersection[18][10],
                 intersection[17][10], intersection[16][10], intersection[15][10], intersection[14][10], intersection[13][10], intersection[12][10],
                 intersection[11][10], intersection[10][10], intersection[9][10], intersection[8][10], intersection[7][10], intersection[6][10],
                 intersection[5][10], intersection[4][10], intersection[3][10], intersection[2][10], intersection[1][10], intersection[0][10]));

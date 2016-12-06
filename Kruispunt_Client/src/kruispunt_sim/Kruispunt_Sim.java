@@ -6,6 +6,7 @@
 package kruispunt_sim;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.AnimationTimer;
@@ -24,6 +25,7 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javax.websocket.DeploymentException;
 
 public class Kruispunt_Sim extends Application {
 
@@ -58,11 +60,6 @@ public class Kruispunt_Sim extends Application {
         tf.setTextFormatter(formatter);
     }
 
-    public String getIpString() {
-        return ipFields[0].getText() + labels[0].getText() + ipFields[1].getText() + labels[1].getText()
-                + ipFields[2].getText() + labels[2].getText() + ipFields[3].getText();
-    }
-
     public void initialize(final Stage primaryStage) {
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(10, 10, 10, 10));
@@ -86,21 +83,18 @@ public class Kruispunt_Sim extends Application {
             }
         }
 
-        ipFields = new TextField[5];
+        ipFields = new TextField[2];
         labels = new Label[ipFields.length - 1];
         for (int i = 0; i < ipFields.length - 1; i++) {
             ipFields[i] = new TextField();
-            ipFields[i].setMaxWidth(50);
+            ipFields[i].setMinWidth(100);
             labels[i] = new Label();
             //addTextLimiter(ipFields[i], 3);
-            labels[i].setText(".");
+            labels[i].setText(":");
         }
         ipFields[ipFields.length - 1] = new TextField();
-        //addTextLimiter(ipFields[ipFields.length - 1], 5);
-        labels[labels.length - 1] = new Label();
-        labels[labels.length - 1].setText(":");
 
-        ipFields[4].setText("8080");
+        ipFields[1].setText("8080");
 
         //intersection = new Intersection();
         updateGrid();
@@ -116,25 +110,36 @@ public class Kruispunt_Sim extends Application {
         btn.setPrefSize(400, 27);
         btn.setOnAction((ActionEvent event) -> {
             if (connection == null) {
-                connection = new ClientSocket(getIpString(), ipFields[4].getText());
-                intersection = new Intersection(connection);
-                btn.setText("Disconnect");
+                try {
+                    connection = new ClientSocket(ipFields[0].getText(), ipFields[1].getText());
+                    intersection = new Intersection(connection);
+                    btn.setText("Disconnect");
+                } catch ( DeploymentException | IOException ex) {
+                    Logger.getLogger(Kruispunt_Sim.class.getName()).log(Level.SEVERE, null, ex);
+                    FxDialogs.showException("Connection error", ex.toString() , ex);
+                    connection = null;
+                    //JOptionPane.showMessageDialog(primaryStage, ex.toString(), "Connection error", JOptionPane.WARNING_MESSAGE);
+                    //System.err.println(ex.toString());
+                } catch (URISyntaxException ex){                   
+                     FxDialogs.showException("Not valid url", ex.toString() , ex);
+                     connection = null;
+                }
+
             } else {
                 try {
                     connection.closeConnection();
                 } catch (IOException ex) {
                     Logger.getLogger(Kruispunt_Sim.class.getName()).log(Level.SEVERE, null, ex);
+                    FxDialogs.showException("Connection error", ex.toString() , ex);
                 }
                 connection = null;
                 intersection = null;
                 timer = 0;
                 btn.setText("Connect");
             }
-
-            System.out.println(getIpString());
         });
 
-        hbox.getChildren().addAll(ipFields[0], labels[0], ipFields[1], labels[1], ipFields[2], labels[2], ipFields[3], labels[3], ipFields[4], btn);
+        hbox.getChildren().addAll(ipFields[0], labels[0], ipFields[1], btn);
         tile.getChildren().add(hbox);
 
         BorderPane pane = new BorderPane();

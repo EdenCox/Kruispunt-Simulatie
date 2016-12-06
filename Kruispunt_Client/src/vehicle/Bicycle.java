@@ -58,7 +58,7 @@ public class Bicycle implements Vehicle {
 
     @Override
     public String getType() {
-        return "B";
+        return "b";
     }
 
 }

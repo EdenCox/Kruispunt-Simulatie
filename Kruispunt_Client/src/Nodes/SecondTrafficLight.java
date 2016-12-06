@@ -6,11 +6,14 @@
 package Nodes;
 
 /**
- * Enum for the different lights
+ *
  * @author Eden
  */
-public enum Light {
-    Yellow,
-    Red,
-    Green    
+public class SecondTrafficLight extends TrafficLight {
+    
+    @Override
+    public boolean isAvailable() {
+        return !hasVehicle() && light != Light.Red;
+    }
+    
 }
