@@ -22,8 +22,8 @@ import vehicle.*;
 public class Intersection {
 
     private final int carSpawnChance = 50;
-    private final int bicycleSpawnChance = 20;
-    private final int pedestrainSpawnChance = 20;
+    private final int bicycleSpawnChance = 15;
+    private final int pedestrainSpawnChance = 15;
     private final int busSpawnChance = 10;
     private final int trainSpawnChance = 5;
     private TrafficNode[][] intersection;

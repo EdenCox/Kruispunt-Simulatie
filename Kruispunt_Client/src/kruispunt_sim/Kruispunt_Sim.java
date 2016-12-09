@@ -27,6 +27,11 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javax.websocket.DeploymentException;
 
+/***
+ * The front-end of the client-app
+ * This class handles the visual look of the simulation
+ * @author Eden
+ */
 public class Kruispunt_Sim extends Application {
 
     TextField[][] field;
@@ -45,7 +50,8 @@ public class Kruispunt_Sim extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-
+    
+    @Deprecated
     public static void addTextLimiter(final TextField tf, final int maxLength) {
         TextFormatter<String> formatter = new TextFormatter<>(change -> {
             String text = change.getText();
@@ -60,6 +66,10 @@ public class Kruispunt_Sim extends Application {
         tf.setTextFormatter(formatter);
     }
 
+    /***
+     * This is where the initialization happens.
+     * @param primaryStage primaryStage variable is passed on from the start method.
+     */
     public void initialize(final Stage primaryStage) {
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(10, 10, 10, 10));
@@ -174,7 +184,10 @@ public class Kruispunt_Sim extends Application {
         }.start();
 
     }
-
+    
+    /***
+     * Method to colorize the grid.
+     */
     private void colorizeGrid() {
         for (int x = 0; x < field.length; x++) {
             for (int y = 0; y < field[0].length; y++) {
@@ -183,6 +196,9 @@ public class Kruispunt_Sim extends Application {
         }
     }
 
+    /***
+     * Method to update de textfield grid.
+     */
     private void updateGrid() {
         if (intersection != null) {
             colorizeGrid();

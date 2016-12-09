@@ -6,7 +6,7 @@
 package Nodes;
 
 /**
- *
+ * A different trafficlight made with the purpose to be able to cross it while it's yellow.
  * @author Eden
  */
 public class SecondTrafficLight extends TrafficLight {

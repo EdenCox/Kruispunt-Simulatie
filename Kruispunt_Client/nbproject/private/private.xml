@@ -5,11 +5,13 @@
         <group>
             <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/vehicle/Bicycle.java</file>
             <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/Nodes/TrafficLight.java</file>
+            <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/Nodes/SecondTrafficLight.java</file>
             <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/vehicle/Train.java</file>
             <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/vehicle/Pedestrian.java</file>
             <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/vehicle/Car.java</file>
             <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/Nodes/Empty.java</file>
             <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/vehicle/Vehicle.java</file>
+            <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/kruispunt_sim/FxDialogs.java</file>
             <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/vehicle/Bus.java</file>
             <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/Nodes/RoadNode.java</file>
             <file>file:/D:/Kruispunt_Simulatie/Kruispunt_Client/src/kruispunt_sim/Intersection.java</file>
