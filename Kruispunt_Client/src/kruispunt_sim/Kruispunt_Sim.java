@@ -124,24 +124,16 @@ public class Kruispunt_Sim extends Application {
                     connection = new ClientSocket(ipFields[0].getText(), ipFields[1].getText());
                     intersection = new Intersection(connection);
                     btn.setText("Disconnect");
-                } catch ( DeploymentException | IOException ex) {
-                    Logger.getLogger(Kruispunt_Sim.class.getName()).log(Level.SEVERE, null, ex);
-                    FxDialogs.showException("Connection error", ex.toString() , ex);
-                    connection = null;
-                    //JOptionPane.showMessageDialog(primaryStage, ex.toString(), "Connection error", JOptionPane.WARNING_MESSAGE);
-                    //System.err.println(ex.toString());
-                } catch (URISyntaxException ex){                   
+                }catch (URISyntaxException ex){                   
                      FxDialogs.showException("Not valid url", ex.toString() , ex);
                      connection = null;
                 }
+                //JOptionPane.showMessageDialog(primaryStage, ex.toString(), "Connection error", JOptionPane.WARNING_MESSAGE);
+                //System.err.println(ex.toString());
+                
 
             } else {
-                try {
-                    connection.closeConnection();
-                } catch (IOException ex) {
-                    Logger.getLogger(Kruispunt_Sim.class.getName()).log(Level.SEVERE, null, ex);
-                    FxDialogs.showException("Connection error", ex.toString() , ex);
-                }
+                connection.closeConnection();
                 connection = null;
                 intersection = null;
                 timer = 0;

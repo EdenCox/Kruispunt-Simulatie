@@ -8,20 +8,10 @@ package kruispunt_sim;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.ZonedDateTime;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javax.websocket.ClientEndpoint;
-import javax.websocket.ContainerProvider;
 import javax.websocket.DeploymentException;
-import javax.websocket.OnClose;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
-import javax.websocket.WebSocketContainer;
-import javax.websocket.OnError;
+import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.handshake.ServerHandshake;
 
 import org.json.*;
 
@@ -30,11 +20,11 @@ import org.json.*;
  *
  * @author Eden
  */
-@ClientEndpoint
-public class ClientSocket {
+
+public class ClientSocket extends WebSocketClient{
 
     private static final Logger LOGGER = Logger.getLogger(ClientSocket.class.getName());
-    private Session session;
+    //private Session session;
     private JSONObject lastState;
 
     /**
@@ -48,8 +38,9 @@ public class ClientSocket {
      * @throws java.net.URISyntaxException
      * @throws java.net.MalformedURLException
      */
-    public ClientSocket(String ip, String port) throws IOException, DeploymentException, URISyntaxException {
-        connectToWebSocket(ip, port);
+    public ClientSocket(String ip, String port) throws URISyntaxException  {
+        super(new URI("ws://" + ip + ":" + port));
+        connectToWebSocket();
         lastState = new JSONObject();
     }
 
@@ -60,35 +51,34 @@ public class ClientSocket {
      * @param session
      * @throws IOException
      */
-    @OnOpen
-    public void onOpen(Session session) throws IOException {
-        this.session = session;
+    @Override
+    public void onOpen(ServerHandshake handshake){
+        
     }
     
     /***
      * Tells the socket what to do when the connection has closed.
      * @throws IOException 
      */
-    @OnClose
-    public void onClose() throws IOException {
-        session.close();
+
+    @Override
+    public void onClose( int code, String reason, boolean remote ) {
+        
     }
     
     /***
      * Tells the socket what to do when it has received a message
      * @param message 
      */
-
-    @OnMessage
+    @Override
     public void onMessage(String message) {
-        System.out.println(ZonedDateTime.now() + " WebSocket message Received!");
-        System.out.println(message);
         lastState = new JSONObject(message);
     }
 
-    @OnError
-    public void onError(Throwable t) {
-        System.err.println(t.toString());
+
+    @Override
+    public void onError(Exception ex) {
+        System.err.println(ex.toString());
     }
 
     /***
@@ -99,14 +89,8 @@ public class ClientSocket {
      * @throws DeploymentException
      * @throws URISyntaxException 
      */
-    private void connectToWebSocket(String ip, String port) throws IOException, DeploymentException, URISyntaxException {
-        WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-        String uriCheck = "ws://" + ip + ":" + port;
-        URI uri = new URI(uriCheck);
-        container.connectToServer(this, uri);
-
-        //LOGGER.log(Level.SEVERE, null, ex);
-        //System.exit(-1);
+    private void connectToWebSocket(){
+        super.connect();
     }
 
     /***
@@ -114,16 +98,11 @@ public class ClientSocket {
      * @param text 
      */
     public void sendString(String text) {
-        try {
-            session.getBasicRemote().sendText(text);
-            //System.out.println(text + " has been send");
-        } catch (IOException ex) {
-            Logger.getLogger(ClientSocket.class.getName()).log(Level.SEVERE, null, ex);
-        }
+         super.send(text);
     }
 
     /***
-     * This method returns the last message gotten from the servr
+     * This method returns the last message gotten from the server
      * @return 
      */
     public JSONObject getState() {
@@ -131,10 +110,9 @@ public class ClientSocket {
     }
 
     /***
-     * This method closes the websocket connections
-     * @throws IOException 
+     * This method closes the websocket connections 
      */
-    public void closeConnection() throws IOException {
-        session.close();
+    public void closeConnection() {
+        super.close();
     }
 }
